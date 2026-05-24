@@ -1,6 +1,6 @@
 /**
  * Nanas Engine - Application Logic Core
- * Handles drawing, canvas calculations, tools, and dynamic file assets.
+ * Handles drawing mechanics, flood fill, key constraints, and dynamic file assets.
  */
 
 // Initialize HTML canvas properties and set pixel context safety
@@ -16,7 +16,7 @@ let snapshot = null; // Holds temporary pixel arrays for live shape preview boun
 let isAltPressed = false;
 let activeFont = 'Arial';
 
-// Pencil grading profile array mapping opacity values and line sizes
+// Pencil grading profile mapping opacity values and line size dividers
 const pencilGrades = {
     '10H': { opacity: 0.05, sizeMultiplier: 0.6 }, '9H': { opacity: 0.08, sizeMultiplier: 0.6 },
     '8H': { opacity: 0.12, sizeMultiplier: 0.7 }, '7H': { opacity: 0.15, sizeMultiplier: 0.7 },
@@ -35,6 +35,7 @@ const pencilGrades = {
 // DOM References
 const colorPicker = document.getElementById('colorPicker');
 const brushSize = document.getElementById('brushSize');
+const globalOpacity = document.getElementById('globalOpacity');
 const pencilGradeSelect = document.getElementById('pencilGrade');
 const fontUpload = document.getElementById('fontUpload');
 
@@ -53,9 +54,12 @@ function setTool(toolName) {
     document.querySelectorAll('#sidebar button').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`tool-${toolName}`).classList.add('active');
 
-    // Toggle tool panels
+    // Toggle conditional configurations UI panels
     document.getElementById('pencil-grade-container').style.display = (toolName === 'pencil') ? 'flex' : 'none';
     document.getElementById('font-container').style.display = (toolName === 'text') ? 'flex' : 'none';
+    
+    // Control visibility of standard opacity controls for cleaner integration
+    document.getElementById('opacity-container').style.display = (toolName === 'pencil' || toolName === 'eraser' || toolName === 'eyedropper' || toolName === 'bucket') ? 'none' : 'flex';
 }
 
 /**
@@ -71,7 +75,17 @@ function hexToRgb(hex) {
     } : null;
 }
 
-// System keyboard listener bindings for standard shape locks
+/**
+ * Mixes hexadecimal colors with custom transparent alpha opacity metrics.
+ * @param {string} hex - Hexadecimal color notation.
+ * @param {number} opacityAlpha - Decimal value between 0.0 and 1.0.
+ */
+function hexToRgbaStr(hex, opacityAlpha) {
+    const rgb = hexToRgb(hex);
+    return rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacityAlpha})` : hex;
+}
+
+// System keyboard listener bindings for aspect ratio lock checks
 window.addEventListener('keydown', (e) => { if (e.key === 'Alt') isAltPressed = true; });
 window.addEventListener('keyup', (e) => { if (e.key === 'Alt') isAltPressed = false; });
 
@@ -145,15 +159,17 @@ canvas.addEventListener('mousedown', (e) => {
     // Capture snapshot array map state prior to layout alterations
     snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
+    // Compute active dynamic opacity scale (0.0 to 1.0 range mapping)
+    const currentAlpha = globalOpacity.value / 100;
+
     ctx.beginPath();
-    ctx.strokeStyle = colorPicker.value;
-    ctx.fillStyle = colorPicker.value;
+    ctx.strokeStyle = hexToRgbaStr(colorPicker.value, currentAlpha);
+    ctx.fillStyle = hexToRgbaStr(colorPicker.value, currentAlpha);
     ctx.lineWidth = brushSize.value;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    if (currentTool === 'brush' || currentTool === 'eraser') {
-        if (currentTool === 'eraser') ctx.strokeStyle = '#ffffff';
+    if (currentTool === 'brush') {
         ctx.moveTo(startX, startY);
         ctx.lineTo(startX, startY);
         ctx.stroke();
@@ -162,6 +178,11 @@ canvas.addEventListener('mousedown', (e) => {
         const rgb = hexToRgb(colorPicker.value);
         ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${grade.opacity})`;
         ctx.lineWidth = Math.max(0.5, brushSize.value * grade.sizeMultiplier * 0.15);
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(startX, startY);
+        ctx.stroke();
+    } else if (currentTool === 'eraser') {
+        ctx.strokeStyle = '#ffffff'; // White out line paths cleanly
         ctx.moveTo(startX, startY);
         ctx.lineTo(startX, startY);
         ctx.stroke();
