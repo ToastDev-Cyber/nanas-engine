@@ -1,8 +1,8 @@
 /* ==========================================================================
-   🍍 NANAS ENGINE - CORE APPLICATION ARCHITECTURE (ALL TOOLS INTEGRATED)
+   ✏️ PENCIL OS ENGINE - MAIN SCRIPT CORE ARCHITECTURE
    ========================================================================== */
 
-// 🌐 Core Workspace Nodes
+// 🌐 Core Viewport Document Selectors
 const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -15,7 +15,7 @@ const exportFormat = document.getElementById('exportFormat');
 const importBtn = document.getElementById('importBtn');
 const imageImporter = document.getElementById('imageImporter');
 
-// 🛠️ Tool Selection Nodes
+// 🛠️ Toolbar Controls Mapping Array
 const brushTool = document.getElementById('brushTool');
 const pencilTool = document.getElementById('pencilTool');
 const eraserTool = document.getElementById('eraserTool');
@@ -31,42 +31,89 @@ const fontSelectorGroup = document.getElementById('fontSelectorGroup');
 const pencilGrade = document.getElementById('pencilGrade');
 const pencilGradeGroup = document.getElementById('pencilGradeGroup');
 
-// 🔄 Engine States
+// 🔄 Core Working Engine States
 let isDrawing = false;
-let currentTool = 'brush'; // Options: 'brush', 'pencil', 'eraser', 'eyedropper', 'bucket', 'line', 'triangle', 'square', 'circle', 'text'
+let currentTool = 'brush'; 
 let startX, startY;        
 let snapshot;              
 let activeTextArea = null; 
 
-// ✏️ Graphite Simulation Profiles (Maps hardness scale directly to stroke parameters)
+// ✏️ Graphite Simulation Matrix Profile Definition (10H to 12B)
 const PENCIL_PROFILES = {
+    '10H': { opacity: 0.05, sizeMultiplier: 0.25 },
+    '8H':  { opacity: 0.08, sizeMultiplier: 0.30 },
     '6H':  { opacity: 0.12, sizeMultiplier: 0.40 },
     '4H':  { opacity: 0.20, sizeMultiplier: 0.50 },
     '2H':  { opacity: 0.35, sizeMultiplier: 0.65 },
     'H':   { opacity: 0.50, sizeMultiplier: 0.80 },
     'HB':  { opacity: 0.65, sizeMultiplier: 1.00 },
     'B':   { opacity: 0.75, sizeMultiplier: 1.20 },
-    '2B':  { opacity: 0.82, sizeMultiplier: 1.40 },
-    '4B':  { opacity: 0.88, sizeMultiplier: 1.70 },
-    '6B':  { opacity: 0.92, sizeMultiplier: 2.10 },
-    '8B':  { opacity: 0.95, sizeMultiplier: 2.50 },
-    '10B': { opacity: 0.98, sizeMultiplier: 3.00 },
-    '12B': { opacity: 1.00, sizeMultiplier: 3.50 }
+    '2B':  { opacity: 0.82, sizeMultiplier: 1.45 },
+    '4B':  { opacity: 0.88, sizeMultiplier: 1.75 },
+    '6B':  { opacity: 0.92, sizeMultiplier: 2.15 },
+    '8B':  { opacity: 0.95, sizeMultiplier: 2.60 },
+    '10B': { opacity: 0.98, sizeMultiplier: 3.10 },
+    '12B': { opacity: 1.00, sizeMultiplier: 3.70 }
 };
 
+// ⚙️ Pencil Texture Image Buffer Management Components
+let pencilTextureImage = new Image();
+let texturePatternCanvas = document.createElement('canvas');
+let texturePatternCtx = texturePatternCanvas.getContext('2d');
+let activePencilPattern = null;
+
+// Target file image link assignment
+pencilTextureImage.src = 'pencil_texture.png'; 
+
+pencilTextureImage.onload = () => {
+    console.log("Pencil OS: Custom lead texture asset processed successfully.");
+    generateTexturedPencilPattern();
+};
+
+pencilTextureImage.onerror = () => {
+    console.log("Pencil OS: 'pencil_texture.png' not found. Defaulting to smooth digital brushes.");
+};
+
+// Process the texture file dynamically using your picked color value
+function generateTexturedPencilPattern() {
+    if (!pencilTextureImage.complete || pencilTextureImage.naturalWidth === 0) return;
+
+    const w = pencilTextureImage.width;
+    const h = pencilTextureImage.height;
+    
+    texturePatternCanvas.width = w;
+    texturePatternCanvas.height = h;
+
+    // Clear old state configurations
+    texturePatternCtx.clearRect(0, 0, w, h);
+    
+    // Step 1: Paint background color canvas buffer maps
+    texturePatternCtx.fillStyle = colorPicker.value;
+    texturePatternCtx.fillRect(0, 0, w, h);
+
+    // Step 2: Multiply color data directly against texture image gray values
+    texturePatternCtx.globalCompositeOperation = 'multiply';
+    texturePatternCtx.drawImage(pencilTextureImage, 0, 0);
+    texturePatternCtx.globalCompositeOperation = 'source-over';
+
+    // Step 3: Turn this mixed canvas buffer map into a paint stroke tool pattern 
+    activePencilPattern = ctx.createPattern(texturePatternCanvas, 'repeat');
+}
+
+// Re-compile pattern data when changing the color wheel
+colorPicker.addEventListener('input', generateTexturedPencilPattern);
+
 // ==========================================================================
-// 🔤 TYPOGRAPHY RUNTIME MANAGEMENT SYSTEM
+// 🔤 TYPEFACE INTERFACE SYSTEM LOADER
 // ==========================================================================
 const REPO_FONTS = {
     "edosz.ttf": "Edo SZ"
 };
-
 const loadedFontsMap = new Map();
 
 function loadRepositoryFonts() {
     Object.entries(REPO_FONTS).forEach(([fontFile, displayName]) => {
         const fontID = fontFile.split('.')[0]; 
-        
         const customFont = new FontFace(fontID, `url(${fontFile})`);
         customFont.load().then((loadedFont) => {
             document.fonts.add(loadedFont);
@@ -76,10 +123,9 @@ function loadRepositoryFonts() {
             option.value = fontID;
             option.textContent = displayName;
             fontSelect.appendChild(option);
-            
-            console.log(`🍍 Nanas Engine: Loaded layout file [${fontFile}] successfully.`);
-        }).catch((err) => {
-            console.log(`⚠️ Nanas Engine: Dynamic file target missing [${fontFile}]. Skipping injection loop.`);
+            console.log(`Pencil OS: Font loaded successfully [${fontFile}].`);
+        }).catch(() => {
+            // Quiet skip fallback loop
         });
     });
 }
@@ -100,7 +146,7 @@ function resizeCanvas() {
     const tempCtx = tempCanvas.getContext('2d');
     tempCtx.drawImage(canvas, 0, 0);
 
-    canvas.width = window.innerWidth;
+    canvas.width = window.innerWidth - 260; // Leave space for sidebar panels
     canvas.height = window.innerHeight;
 
     clearToWhite();
@@ -109,12 +155,11 @@ function resizeCanvas() {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 }
-
 window.addEventListener('resize', resizeCanvas);
 setTimeout(resizeCanvas, 1); 
 
 // ==========================================================================
-// 🎯 DATA PARSER MATH COMPILER METHODS
+// 🎯 RUNTIME COORDINATE MATH PIPELINE
 // ==========================================================================
 function getCoordinates(e) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -140,7 +185,7 @@ function hexToRgbaString(hex, alpha) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// 🪣 High-Performance Non-Recursive Stack-Based Flood Fill
+// 🪣 Non-Recursive Flood Fill System
 function floodFill(startX, startY, fillColor) {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
@@ -153,14 +198,7 @@ function floodFill(startX, startY, fillColor) {
     const targetB = data[targetIdx + 2];
     const targetA = data[targetIdx + 3];
 
-    if (
-        targetR === fillColor.r &&
-        targetG === fillColor.g &&
-        targetB === fillColor.b &&
-        targetA === fillColor.a
-    ) {
-        return;
-    }
+    if (targetR === fillColor.r && targetG === fillColor.g && targetB === fillColor.b && targetA === fillColor.a) return;
 
     const queue = [[startX, startY]];
 
@@ -168,12 +206,7 @@ function floodFill(startX, startY, fillColor) {
         const [cx, cy] = queue.shift();
         const idx = (cy * width + cx) * 4;
 
-        if (
-            data[idx] === targetR &&
-            data[idx + 1] === targetG &&
-            data[idx + 2] === targetB &&
-            data[idx + 3] === targetA
-        ) {
+        if (data[idx] === targetR && data[idx + 1] === targetG && data[idx + 2] === targetB && data[idx + 3] === targetA) {
             data[idx] = fillColor.r;
             data[idx + 1] = fillColor.g;
             data[idx + 2] = fillColor.b;
@@ -189,17 +222,27 @@ function floodFill(startX, startY, fillColor) {
 }
 
 // ==========================================================================
-// 🛠️ CONFIGURATION HELPER FOR ENGINES
+// 🛠️ CONFIGURATION ENGINE STYLES SWITCHER
 // ==========================================================================
 function configureBrushStyle() {
+    ctx.globalAlpha = 1.0; 
+
     if (currentTool === 'eraser') {
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = brushSize.value;
     } else if (currentTool === 'pencil') {
         const grade = pencilGrade.value;
         const profile = PENCIL_PROFILES[grade];
-        ctx.strokeStyle = hexToRgbaString(colorPicker.value, profile.opacity);
+        
         ctx.lineWidth = Math.max(0.5, brushSize.value * profile.sizeMultiplier);
+        ctx.globalAlpha = profile.opacity;
+
+        // Apply textured pattern image if loaded, otherwise fallback gracefully
+        if (activePencilPattern) {
+            ctx.strokeStyle = activePencilPattern;
+        } else {
+            ctx.strokeStyle = hexToRgbaString(colorPicker.value, 1.0);
+        }
     } else {
         ctx.strokeStyle = colorPicker.value;
         ctx.lineWidth = brushSize.value;
@@ -207,7 +250,7 @@ function configureBrushStyle() {
 }
 
 // ==========================================================================
-// 🖌️ CORE DRAWING INPUT EXECUTION PIPELINE
+// 🖌️ EVENT DRAWING LIFECYCLE CONTROLLER
 // ==========================================================================
 function startDrawing(e) {
     if (activeTextArea) {
@@ -225,6 +268,7 @@ function startDrawing(e) {
         const g = fillColor[1].toString(16).padStart(2, '0');
         const b = fillColor[2].toString(16).padStart(2, '0');
         colorPicker.value = `#${r}${g}${b}`;
+        generateTexturedPencilPattern(); 
         return;
     }
 
@@ -255,6 +299,7 @@ function stopDrawing() {
     if (currentTool === 'text' || currentTool === 'bucket' || currentTool === 'eyedropper') return;
     isDrawing = false;
     ctx.beginPath();
+    ctx.globalAlpha = 1.0; 
 }
 
 function draw(e) {
@@ -315,7 +360,7 @@ function draw(e) {
 }
 
 // ==========================================================================
-// 🔤 OVERLAY TEXT ENGINE SUBSYSTEM
+// 🔤 OVERLAY INTERACTIVE TEXTBOX SUBSYSTEM
 // ==========================================================================
 function createTextbox(x, y) {
     const container = document.getElementById('canvasContainer');
@@ -379,7 +424,7 @@ function updateContextSelectorsVisibility() {
 }
 
 // ==========================================
-// 📡 ROUTING INPUT EVENT LISTENERS
+// 📡 INTERACTION EVENT LISTENER ROUTING
 // ==========================================
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mouseup', stopDrawing);
@@ -416,6 +461,8 @@ fontSelect.addEventListener('change', () => {
     }
 });
 
+pencilGrade.addEventListener('change', generateTexturedPencilPattern);
+
 brushSize.addEventListener('input', () => {
     sizeVal.textContent = `${brushSize.value}px`;
 });
@@ -429,7 +476,7 @@ clearBtn.addEventListener('click', () => {
 });
 
 // ==========================================
-// 📂 FILE MANAGEMENT INTEGRATION CORE
+// 📂 EXTERNAL FILE MANAGEMENT PIPELINE
 // ==========================================
 importBtn.addEventListener('click', () => {
     imageImporter.click();
@@ -465,7 +512,7 @@ exportBtn.addEventListener('click', () => {
     const imageURI = canvas.toDataURL(mimeType, 1.0);
 
     const virtualLink = document.createElement('a');
-    virtualLink.download = `nanas-artwork${extension}`; 
+    virtualLink.download = `pencil-os-artwork${extension}`; 
     virtualLink.href = imageURI;
 
     document.body.appendChild(virtualLink);
