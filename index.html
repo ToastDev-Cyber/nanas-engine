@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanas Engine - Paint App</title>
+    <title>Nanas Engine - New Architecture</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Main Workspace Container -->
+    <!-- 🗺️ Core Engine Viewport Container -->
     <div id="canvasContainer">
         <canvas id="paintCanvas"></canvas>
     </div>
 
-    <!-- Top Floating Toolbar Wrapper -->
+    <!-- 🎛️ Unified Command Bar / Floating Control Deck -->
     <div id="toolbar">
-        <!-- 🍍 Small Nanas Engine Branding Logo -->
+        
+        <!-- 🍍 Nanas Engine Mini Brand Identity Icon -->
         <div id="logoContainer">
             <img src="logo.png" alt="Nanas Engine Logo" id="engineLogo">
         </div>
 
+        <!-- 🛠️ Main Tool Execution Suite -->
         <div class="tool-section separator">
             <button id="brushTool" class="tool-btn active">🖌️ Brush</button>
             <button id="bucketTool" class="tool-btn">🪣 Bucket</button>
@@ -28,31 +30,32 @@
             <button id="textTool" class="tool-btn">🔤 Text</button>
         </div>
 
+        <!-- 🎨 Vector Input Properties Panel -->
         <div class="tool-section separator">
-            <input type="color" id="colorPicker" value="#000000" title="Select Paint Color">
+            <input type="color" id="colorPicker" value="#000000" title="Select Tool Color">
             <div class="slider-group">
                 <input type="range" id="brushSize" min="5" max="100" value="20">
                 <span id="sizeVal">20px</span>
             </div>
         </div>
 
-        <!-- Font Selector Panel (Only reveals when Text tool is active) -->
+        <!-- 🔤 Typography Controller Module (Injected via JS loop engine) -->
         <div id="fontSelectorGroup" class="tool-section" style="display: none;">
             <label for="fontSelect">Font:</label>
             <select id="fontSelect">
                 <option value="sans-serif">System Sans-Serif</option>
-                <!-- Edo SZ is injected right here automatically by app.js -->
+                <!-- Edo SZ option link initialized right here by app.js engine font face resolver -->
             </select>
         </div>
 
-        <!-- 📂 Import/Export File Management Group -->
+        <!-- 💾 File Management Terminal Section -->
         <div class="tool-section separator right-align">
-            <!-- Hidden native loader node triggered via custom UI button skin -->
+            <!-- Hidden binary input link element for importing images natively -->
             <input type="file" id="imageImporter" accept="image/png, image/jpeg, image/webp" style="display: none;">
-            <button id="importBtn" class="action-btn import-style">📂 Import Image</button>
+            <button id="importBtn" class="action-btn import-style">📂 Import</button>
             
             <div class="format-group">
-                <select id="exportFormat" title="Choose file format type">
+                <select id="exportFormat" title="Bitmap Export Type Target">
                     <option value="image/png">.PNG (Lossless)</option>
                     <option value="image/jpeg">.JPG (Compressed)</option>
                     <option value="image/webp">.WEBP (Modern)</option>
@@ -64,6 +67,7 @@
         </div>
     </div>
 
+    <!-- Core Engine Scripts -->
     <script src="app.js"></script>
 </body>
 </html>
