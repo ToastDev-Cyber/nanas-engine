@@ -5,6 +5,7 @@ const colorPicker = document.getElementById('colorPicker');
 const brushSize = document.getElementById('brushSize');
 const sizeVal = document.getElementById('sizeVal');
 const clearBtn = document.getElementById('clearBtn');
+const exportBtn = document.getElementById('exportBtn');
 
 // Tool controls
 const brushTool = document.getElementById('brushTool');
@@ -50,6 +51,12 @@ function loadRepositoryFonts() {
 }
 loadRepositoryFonts();
 
+// Smart canvas initial setup & scale preservation
+function clearToWhite() {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 function resizeCanvas() {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width;
@@ -60,7 +67,10 @@ function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    // Default white background base so image exports are never transparent grid blanks
+    clearToWhite();
     ctx.drawImage(tempCanvas, 0, 0);
+    
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 }
@@ -318,5 +328,24 @@ clearBtn.addEventListener('click', () => {
         activeTextArea.remove();
         activeTextArea = null;
     }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearToWhite();
+});
+
+// 💾 EXPORT FILE EMITTER
+exportBtn.addEventListener('click', () => {
+    // If user is currently typing text, stamp it down before export captures the frame
+    if (activeTextArea) finalizeText();
+
+    // 1. Convert canvas rendering context matrix data into raw image uri format
+    const imageURI = canvas.toDataURL('image/png');
+
+    // 2. Synthesize virtual link node anchor injection element
+    const virtualLink = document.createElement('a');
+    virtualLink.download = 'nanas-artwork.png'; // File name setup target designation
+    virtualLink.href = imageURI;
+
+    // 3. Command browser execution loop trigger click sequence safely
+    document.body.appendChild(virtualLink);
+    virtualLink.click();
+    document.body.removeChild(virtualLink);
 });
