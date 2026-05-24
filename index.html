@@ -3,105 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanas Engine - Workspace</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Pencil OS - Creative Studio</title>
+    <style>
+        :root {
+            --bg-dark: #121214;
+            --sidebar-bg: #1a1a1e;
+            --panel-bg: #26262b;
+            --accent-blue: #4a90e2;
+            --text-main: #e2e2e9;
+            --text-muted: #8e8e93;
+            --active-tool: #3a3a42;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            color: var(--text-main);
+        }
+
+        /* 🎛️ Sidebar Layout Panels */
+        #sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid #2d2d34;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-align: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #2d2d34;
+            color: var(--accent-blue);
+        }
+
+        .section-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .tool-btn {
+            background-color: var(--panel-bg);
+            border: 1px solid transparent;
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .tool-btn:hover {
+            background-color: #32323a;
+        }
+
+        .tool-btn.active {
+            background-color: var(--active-tool);
+            border-color: var(--accent-blue);
+        }
+
+        /* 🎚️ Settings Configurations */
+        .slider-group, .select-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: var(--panel-bg);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 100%;
+            height: 36px;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+
+        select {
+            background: #121214;
+            color: var(--text-main);
+            border: 1px solid #444;
+            padding: 6px;
+            border-radius: 4px;
+            outline: none;
+            font-size: 12px;
+            width: 100%;
+        }
+
+        /* 💾 File & Export Controls */
+        .file-actions {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 100%;
+            background-color: var(--panel-bg);
+            border: 1px solid #3e3e46;
+            color: var(--text-main);
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: #3e3e46;
+        }
+
+        #clearBtn {
+            background-color: #722c2c;
+            border-color: #923c3c;
+        }
+
+        #clearBtn:hover {
+            background-color: #8a3535;
+        }
+
+        /* 🎨 Workspace Canvas Viewport */
+        #canvasContainer {
+            flex-grow: 1;
+            position: relative;
+            background-color: #1e1e24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            cursor: crosshair;
+        }
+
+        /* 🔤 Interactive Textbox System */
+        .canvas-textarea {
+            position: absolute;
+            background: transparent;
+            border: 1px dashed var(--accent-blue);
+            color: white;
+            outline: none;
+            resize: none;
+            overflow: hidden;
+            font-family: sans-serif;
+            line-height: 1.1;
+            padding: 0;
+            margin: 0;
+            white-space: pre;
+        }
+    </style>
 </head>
 <body>
 
-    <div id="canvasContainer">
-        <!-- 🎛️ VERTICAL LEFT-SIDEBAR CONTROL TOOLBAR -->
-        <div id="toolbar">
-            <div id="logoContainer">
-                <!-- Replace with your actual asset path if you have an engine logo -->
-                <strong style="color: #fff; font-family: sans-serif; font-size: 14px; letter-spacing: 1px;">NANAS ENGINE</strong>
-            </div>
+    <div id="sidebar">
+        <div class="brand">PENCIL OS ENGINE</div>
 
-            <div class="separator"></div>
-
-            <!-- 🖌️ Core Drawing Utilities Section -->
-            <div class="tool-section">
-                <button id="brushTool" class="tool-btn active">🖌️ Brush</button>
-                <button id="pencilTool" class="tool-btn">✏️ Pencil</button>
-                <button id="eraserTool" class="tool-btn">🧼 Eraser</button>
-                <button id="eyedropperTool" class="tool-btn">🧪 Eyedropper</button>
-                <button id="bucketTool" class="tool-btn">🪣 Bucket</button>
-            </div>
-
-            <div class="separator"></div>
-
-            <!-- 📐 Structural Shapes Section -->
-            <div class="tool-section">
-                <button id="lineTool" class="tool-btn">📏 Line</button>
-                <button id="triangleTool" class="tool-btn">🔺 Triangle</button>
-                <button id="squareTool" class="tool-btn">⬜ Square</button>
-                <button id="circleTool" class="tool-btn">⭕ Circle</button>
-                <button id="textTool" class="tool-btn">🔤 Text</button>
-            </div>
-
-            <div class="separator"></div>
-
-            <!-- ⚙️ Context-Dependent Parameters Section -->
-            <div class="tool-section">
-                <div class="slider-group">
-                    <label for="colorPicker" style="color:#aaa; font-size:11px;">COLOR</label>
-                    <input type="color" id="colorPicker" value="#000000">
-                </div>
-                
-                <div class="slider-group" id="brushSizeGroup">
-                    <label for="brushSize" style="color:#aaa; font-size:11px;">BRUSH SIZE</label>
-                    <input type="range" id="brushSize" min="1" max="50" value="5">
-                    <span id="sizeVal" style="color:#fff; font-size:12px;">5px</span>
-                </div>
-
-                <!-- ✏️ Dynamic Graphite Pencil Hardness Grade Selection Panel -->
-                <div class="slider-group" id="pencilGradeGroup" style="display: none;">
-                    <label for="pencilGrade" style="color:#aaa; font-size:11px;">LEAD GRADE</label>
-                    <select id="pencilGrade" style="background: #222; color: #fff; border: 1px solid #44px; padding: 4px; border-radius: 4px; width: 100%;">
-                        <option value="6H">6H (Hardest / Extremely Light)</option>
-                        <option value="4H">4H</option>
-                        <option value="2H">2H</option>
-                        <option value="H">H</option>
-                        <option value="HB" selected>HB (Medium Balance)</option>
-                        <option value="B">B</option>
-                        <option value="2B">2B</option>
-                        <option value="4B">4B</option>
-                        <option value="6B">6B</option>
-                        <option value="8B">8B</option>
-                        <option value="10B">10B</option>
-                        <option value="12B">12B (Softest / Ultra Dark)</option>
-                    </select>
-                </div>
-
-                <!-- 🔤 Dynamic Custom Font Selector Wrapper -->
-                <div class="slider-group" id="fontSelectorGroup" style="display: none;">
-                    <label for="fontSelect" style="color:#aaa; font-size:11px;">TYPOGRAPHY</label>
-                    <select id="fontSelect" style="background: #222; color: #fff; border: 1px solid #44px; padding: 4px; border-radius: 4px; width: 100%;">
-                        <option value="sans-serif">System Sans-Serif</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="separator"></div>
-
-            <!-- 📂 System Operations Group -->
-            <div class="tool-section right-align">
-                <button id="clearBtn" class="action-btn" style="background: #d9534f; color:#fff;">🗑️ Clear All</button>
-                
-                <div class="format-group" style="display:flex; flex-direction:column; gap:4px; width:100%;">
-                    <select id="exportFormat" style="background: #222; color: #fff; border: 1px solid #44px; padding: 4px; border-radius: 4px;">
-                        <option value="image/png">PNG Format</option>
-                        <option value="image/jpeg">JPEG Format</option>
-                        <option value="image/webp">WEBP Format</option>
-                    </select>
-                    <button id="exportBtn" class="action-btn" style="background: #5cb85c; color:#fff;">💾 Export File</button>
-                </div>
-
-                <button id="importBtn" class="action-btn" style="background: #0275d8; color:#fff;">📂 Import Image</button>
-                <input type="file" id="imageImporter" accept="image/*" style="display: none;">
+        <!-- 🛠️ Main Toolkit Grid -->
+        <div>
+            <div class="section-title">Studio Tools</div>
+            <div class="tool-grid">
+                <button class="tool-btn active" id="brushTool">🖌️ Brush</button>
+                <button class="tool-btn" id="pencilTool">✏️ Pencil</button>
+                <button class="tool-btn" id="eraserTool">🧽 Eraser</button>
+                <button class="tool-btn" id="eyedropperTool">🧪 Drop</button>
+                <button class="tool-btn" id="bucketTool">🪣 Bucket</button>
+                <button class="tool-btn" id="lineTool">📏 Line</button>
+                <button class="tool-btn" id="triangleTool">🔺 Tri</button>
+                <button class="tool-btn" id="squareTool">⬛ Square</button>
+                <button class="tool-btn" id="circleTool">⚪ Circle</button>
+                <button class="tool-btn" id="textTool">🔤 Text</button>
             </div>
         </div>
 
-        <!-- 🖼️ THE MAIN HARDWARE CANVAS ELEMENT -->
+        <!-- 🎨 Color Spectrum Selector -->
+        <div>
+            <div class="section-title">Color Palette</div>
+            <input type="color" id="colorPicker" value="#2c3e50">
+        </div>
+
+        <!-- 🎚️ Dynamic Context Controls -->
+        <div class="slider-group">
+            <div class="section-title" style="display:flex; justify-content:space-between; margin-bottom:0;">
+                <span>Brush Dimension</span>
+                <span id="sizeVal">8px</span>
+            </div>
+            <input type="range" id="brushSize" min="1" max="100" value="8">
+        </div>
+
+        <!-- ✏️ Pencil Grade Setup Window -->
+        <div class="select-group" id="pencilGradeGroup" style="display: none;">
+            <div class="section-title">Lead Grade</div>
+            <select id="pencilGrade">
+                <option value="10H">10H (Hardest / Extra Light)</option>
+                <option value="8H">8H</option>
+                <option value="6H">6H</option>
+                <option value="4H">4H</option>
+                <option value="2H">2H</option>
+                <option value="H">H</option>
+                <option value="HB" selected>HB (Medium Balance)</option>
+                <option value="B">B</option>
+                <option value="2B">2B</option>
+                <option value="4B">4B</option>
+                <option value="6B">6B</option>
+                <option value="8B">8B</option>
+                <option value="10B">10B</option>
+                <option value="12B">12B (Softest / Heavy Dark)</option>
+            </select>
+        </div>
+
+        <!-- 🔤 Font Select Window -->
+        <div class="select-group" id="fontSelectorGroup" style="display: none;">
+            <div class="section-title">Typography Style</div>
+            <select id="fontSelect">
+                <option value="sans-serif">Standard Sans-Serif</option>
+            </select>
+        </div>
+
+        <!-- 📂 Export Panel Actions -->
+        <div class="file-actions">
+            <div class="section-title">Workspace Data</div>
+            <button class="action-btn" id="importBtn">📂 Import Photo</button>
+            <input type="file" id="imageImporter" accept="image/*" style="display: none;">
+            
+            <div style="display: flex; gap: 4px;">
+                <select id="exportFormat" style="flex: 1;">
+                    <option value="image/png">PNG</option>
+                    <option value="image/jpeg">JPEG</option>
+                    <option value="image/webp">WEBP</option>
+                </select>
+                <button class="action-btn" id="exportBtn" style="flex: 1.5;">💾 Export</button>
+            </div>
+            <button class="action-btn" id="clearBtn">🗑️ Reset Canvas</button>
+        </div>
+    </div>
+
+    <!-- 🖌️ Viewport Frame Display -->
+    <div id="canvasContainer">
         <canvas id="paintCanvas"></canvas>
     </div>
 
