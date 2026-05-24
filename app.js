@@ -17,22 +17,43 @@ const imageImporter = document.getElementById('imageImporter');
 
 // 🛠️ Tool Selection Nodes
 const brushTool = document.getElementById('brushTool');
+const pencilTool = document.getElementById('pencilTool');
 const eraserTool = document.getElementById('eraserTool');
 const eyedropperTool = document.getElementById('eyedropperTool');
 const bucketTool = document.getElementById('bucketTool');
 const lineTool = document.getElementById('lineTool');
+const triangleTool = document.getElementById('triangleTool');
 const squareTool = document.getElementById('squareTool');
 const circleTool = document.getElementById('circleTool');
 const textTool = document.getElementById('textTool');
 const fontSelect = document.getElementById('fontSelect');
 const fontSelectorGroup = document.getElementById('fontSelectorGroup');
+const pencilGrade = document.getElementById('pencilGrade');
+const pencilGradeGroup = document.getElementById('pencilGradeGroup');
+const brushSizeGroup = document.getElementById('brushSizeGroup');
 
 // 🔄 Engine States
 let isDrawing = false;
-let currentTool = 'brush'; // Options: 'brush', 'eraser', 'eyedropper', 'bucket', 'line', 'square', 'circle', 'text'
+let currentTool = 'brush'; // Options: 'brush', 'pencil', 'eraser', 'eyedropper', 'bucket', 'line', 'triangle', 'square', 'circle', 'text'
 let startX, startY;        
 let snapshot;              
 let activeTextArea = null; 
+
+// ✏️ Graphite Simulation Profiles (Maps hardness scale directly to stroke parameters)
+const PENCIL_PROFILES = {
+    '6H':  { opacity: 0.12, sizeMultiplier: 0.40 },
+    '4H':  { opacity: 0.20, sizeMultiplier: 0.50 },
+    '2H':  { opacity: 0.35, sizeMultiplier: 0.65 },
+    'H':   { opacity: 0.50, sizeMultiplier: 0.80 },
+    'HB':  { opacity: 0.65, sizeMultiplier: 1.00 },
+    'B':   { opacity: 0.75, sizeMultiplier: 1.20 },
+    '2B':  { opacity: 0.82, sizeMultiplier: 1.40 },
+    '4B':  { opacity: 0.88, sizeMultiplier: 1.70 },
+    '6B':  { opacity: 0.92, sizeMultiplier: 2.10 },
+    '8B':  { opacity: 0.95, sizeMultiplier: 2.50 },
+    '10B': { opacity: 0.98, sizeMultiplier: 3.00 },
+    '12B': { opacity: 1.00, sizeMultiplier: 3.50 }
+};
 
 // ==========================================================================
 // 🔤 TYPOGRAPHY RUNTIME MANAGEMENT SYSTEM
@@ -47,13 +68,11 @@ function loadRepositoryFonts() {
     Object.entries(REPO_FONTS).forEach(([fontFile, displayName]) => {
         const fontID = fontFile.split('.')[0]; 
         
-        // Use browser runtime api to hook file asset paths dynamically
         const customFont = new FontFace(fontID, `url(${fontFile})`);
         customFont.load().then((loadedFont) => {
             document.fonts.add(loadedFont);
             loadedFontsMap.set(fontID, true);
             
-            // Inject structural drop-down option into index DOM hook
             const option = document.createElement('option');
             option.value = fontID;
             option.textContent = displayName;
@@ -76,28 +95,24 @@ function clearToWhite() {
 }
 
 function resizeCanvas() {
-    // Preserve old rendering frame matrix data state before adjusting aspect layout links
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
     const tempCtx = tempCanvas.getContext('2d');
     tempCtx.drawImage(canvas, 0, 0);
 
-    // Refresh canvas node sizing metrics based on modern browser viewport states
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Stamp baseline layer flat white so pixel data transfers never export transparent checkered boxes
     clearToWhite();
     ctx.drawImage(tempCanvas, 0, 0);
     
-    // Core drawing smooth physics configurations
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 }
 
 window.addEventListener('resize', resizeCanvas);
-setTimeout(resizeCanvas, 1); // Trigger instant scale adjustment loop context at runtime load
+setTimeout(resizeCanvas, 1); 
 
 // ==========================================================================
 // 🎯 DATA PARSER MATH COMPILER METHODS
@@ -119,6 +134,14 @@ function hexToRgba(hex) {
     return { r, g, b, a: 255 };
 }
 
+// Helper to convert hex strings and apply alpha opacity layers cleanly
+function hexToRgbaString(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // 🪣 High-Performance Non-Recursive Stack-Based Flood Fill
 function floodFill(startX, startY, fillColor) {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -132,7 +155,6 @@ function floodFill(startX, startY, fillColor) {
     const targetB = data[targetIdx + 2];
     const targetA = data[targetIdx + 3];
 
-    // Prevent endless loops if fill destination holds identical matching pixel structures
     if (
         targetR === fillColor.r &&
         targetG === fillColor.g &&
@@ -169,6 +191,26 @@ function floodFill(startX, startY, fillColor) {
 }
 
 // ==========================================================================
+// 🛠️ CONFIGURATION HELPER FOR ENGINES
+// ==========================================================================
+function configureBrushStyle() {
+    if (currentTool === 'eraser') {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = brushSize.value;
+    } else if (currentTool === 'pencil') {
+        const grade = pencilGrade.value;
+        const profile = PENCIL_PROFILES[grade];
+        // Merge opacity modifiers onto our target core drawing canvas stroke
+        ctx.strokeStyle = hexToRgbaString(colorPicker.value, profile.opacity);
+        // Base brush sizing matrix scaled against real lead tip properties
+        ctx.lineWidth = Math.max(0.5, brushSize.value * profile.sizeMultiplier);
+    } else {
+        ctx.strokeStyle = colorPicker.value;
+        ctx.lineWidth = brushSize.value;
+    }
+}
+
+// ==========================================================================
 // 🖌️ CORE DRAWING INPUT EXECUTION PIPELINE
 // ==========================================================================
 function startDrawing(e) {
@@ -181,7 +223,6 @@ function startDrawing(e) {
     startX = coords.x;
     startY = coords.y;
 
-    // 🧪 Tool Mode: Eyedropper Sampler
     if (currentTool === 'eyedropper') {
         const fillColor = ctx.getImageData(startX, startY, 1, 1).data;
         const r = fillColor[0].toString(16).padStart(2, '0');
@@ -191,26 +232,22 @@ function startDrawing(e) {
         return;
     }
 
-    // 🔤 Tool Mode: Interactive Font Text overlay
     if (currentTool === 'text') {
         createTextbox(startX, startY);
         return;
     }
 
-    // 🪣 Tool Mode: Flood Fill Bucket
     if (currentTool === 'bucket') {
         const fillColor = hexToRgba(colorPicker.value);
         floodFill(startX, startY, fillColor);
         return;
     }
 
-    // 🖌️ Active Drawing Routine Configuration
     isDrawing = true;
-    ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : colorPicker.value;
-    ctx.lineWidth = brushSize.value;
+    configureBrushStyle();
     snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    if (currentTool === 'brush' || currentTool === 'eraser') {
+    if (currentTool === 'brush' || currentTool === 'pencil' || currentTool === 'eraser') {
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(startX, startY);
@@ -230,12 +267,11 @@ function draw(e) {
     const coords = getCoordinates(e);
     const currentX = coords.x;
     const currentY = coords.y;
-    const isAltPressed = e.altKey; // Modifier shortcut hook for symmetry constraints
+    const isAltPressed = e.altKey; 
 
-    ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : colorPicker.value;
-    ctx.lineWidth = brushSize.value;
+    configureBrushStyle();
 
-    if (currentTool === 'brush' || currentTool === 'eraser') {
+    if (currentTool === 'brush' || currentTool === 'pencil' || currentTool === 'eraser') {
         ctx.lineTo(currentX, currentY);
         ctx.stroke();
         ctx.beginPath();
@@ -245,6 +281,15 @@ function draw(e) {
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(currentX, currentY);
+        ctx.stroke();
+    } else if (currentTool === 'triangle') {
+        ctx.putImageData(snapshot, 0, 0);
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(currentX, currentY);
+        const baseWidthOffset = currentX - startX;
+        ctx.lineTo(startX - baseWidthOffset, currentY);
+        ctx.closePath();
         ctx.stroke();
     } else if (currentTool === 'square') {
         ctx.putImageData(snapshot, 0, 0);
@@ -292,7 +337,6 @@ function createTextbox(x, y) {
     textarea.style.width = '200px';
     textarea.style.height = `${parseInt(brushSize.value) + 10}px`;
 
-    // Handle auto-expansion parameters dynamically during structural text typing frames
     textarea.addEventListener('input', () => {
         textarea.style.width = 'auto';
         textarea.style.width = `${textarea.scrollWidth + 20}px`;
@@ -325,7 +369,7 @@ function finalizeText() {
         let currentY = y;
         lines.forEach(line => {
             ctx.fillText(line, x, currentY);
-            currentY += parseInt(brushSize.value, 10) * 1.05; // Line-height spacing buffer constant
+            currentY += parseInt(brushSize.value, 10) * 1.05; 
         });
     }
 
@@ -333,8 +377,9 @@ function finalizeText() {
     activeTextArea = null;
 }
 
-function updateFontSelectorVisibility() {
+function updateContextSelectorsVisibility() {
     fontSelectorGroup.style.display = (currentTool === 'text') ? 'flex' : 'none';
+    pencilGradeGroup.style.display = (currentTool === 'pencil') ? 'flex' : 'none';
 }
 
 // ==========================================
@@ -345,7 +390,6 @@ canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseleave', stopDrawing);
 
-// Full Mobile/Touch Interaction Interfaces
 canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, { passive: false });
 canvas.addEventListener('touchend', stopDrawing);
 canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
@@ -355,14 +399,16 @@ function setActiveTool(tool, clickedButton) {
     currentTool = tool;
     document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
     clickedButton.classList.add('active');
-    updateFontSelectorVisibility();
+    updateContextSelectorsVisibility();
 }
 
 brushTool.addEventListener('click', () => setActiveTool('brush', brushTool));
+pencilTool.addEventListener('click', () => setActiveTool('pencil', pencilTool));
 eraserTool.addEventListener('click', () => setActiveTool('eraser', eraserTool));
 eyedropperTool.addEventListener('click', () => setActiveTool('eyedropper', eyedropperTool));
 bucketTool.addEventListener('click', () => setActiveTool('bucket', bucketTool));
 lineTool.addEventListener('click', () => setActiveTool('line', lineTool));
+triangleTool.addEventListener('click', () => setActiveTool('triangle', triangleTool));
 squareTool.addEventListener('click', () => setActiveTool('square', squareTool));
 circleTool.addEventListener('click', () => setActiveTool('circle', circleTool));
 textTool.addEventListener('click', () => setActiveTool('text', textTool));
@@ -389,8 +435,6 @@ clearBtn.addEventListener('click', () => {
 // ==========================================
 // 📂 FILE MANAGEMENT INTEGRATION CORE
 // ==========================================
-
-// 📂 Bitmap Input Loading Stream
 importBtn.addEventListener('click', () => {
     imageImporter.click();
 });
@@ -404,35 +448,26 @@ imageImporter.addEventListener('change', (e) => {
         const img = new Image();
         img.onload = () => {
             if (activeTextArea) finalizeText();
-            
-            // Calculate dynamic offsets to center incoming images perfectly onto canvas coordinates
             const xOffset = (canvas.width - img.width) / 2;
             const yOffset = (canvas.height - img.height) / 2;
-            
             ctx.drawImage(img, xOffset, yOffset);
-            imageImporter.value = ''; // Reset input log target buffer link
+            imageImporter.value = ''; 
         };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
 });
 
-// 💾 Multi-Format Core Bitmap Exporter
 exportBtn.addEventListener('click', () => {
     if (activeTextArea) finalizeText();
 
-    // 1. Identify current target mime type selection
     const mimeType = exportFormat.value; 
-    
-    // 2. Map file structure types out to string attachments
     let extension = '.png';
     if (mimeType === 'image/jpeg') extension = '.jpg';
     if (mimeType === 'image/webp') extension = '.webp';
 
-    // 3. Convert rendering matrix coordinates down to raw target context string links
     const imageURI = canvas.toDataURL(mimeType, 1.0);
 
-    // 4. Fire clean virtual link node execution sequences down onto the local machine system
     const virtualLink = document.createElement('a');
     virtualLink.download = `nanas-artwork${extension}`; 
     virtualLink.href = imageURI;
