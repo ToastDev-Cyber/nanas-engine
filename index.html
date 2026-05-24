@@ -45,9 +45,22 @@
             </select>
         </div>
 
-        <div class="tool-section right-align">
-            <button id="exportBtn" class="action-btn export-style">💾 Export PNG</button>
-            <button id="clearBtn" class="action-btn">🗑️ Clear Canvas</button>
+        <!-- 📂 Import/Export File Management Group -->
+        <div class="tool-section separator right-align">
+            <!-- Hidden native loader node triggered via custom UI button skin -->
+            <input type="file" id="imageImporter" accept="image/png, image/jpeg, image/webp" style="display: none;">
+            <button id="importBtn" class="action-btn import-style">📂 Import Image</button>
+            
+            <div class="format-group">
+                <select id="exportFormat" title="Choose file format type">
+                    <option value="image/png">.PNG (Lossless)</option>
+                    <option value="image/jpeg">.JPG (Compressed)</option>
+                    <option value="image/webp">.WEBP (Modern)</option>
+                </select>
+                <button id="exportBtn" class="action-btn export-style">💾 Export</button>
+            </div>
+            
+            <button id="clearBtn" class="action-btn clear-style">🗑️ Clear</button>
         </div>
     </div>
 
