@@ -53,8 +53,8 @@ canvas {
 }
 
 #engineLogo {
-    height: 24px;         /* 👈 Perfect small icon size scale */
-    width: auto;          /* Keeps original aspect ratio dimensions */
+    height: 24px;
+    width: auto;
     object-fit: contain;
 }
 
@@ -98,6 +98,7 @@ canvas {
     font-weight: 600;
 }
 
+/* Red Delete Accent */
 .action-btn {
     background-color: #8c2020;
     border-color: #b33636;
@@ -105,6 +106,16 @@ canvas {
 
 .action-btn:hover {
     background-color: #b33636;
+}
+
+/* 🟢 Green Saving Accent */
+.action-btn.export-style {
+    background-color: #1e6b36;
+    border-color: #2b9e4f;
+}
+
+.action-btn.export-style:hover {
+    background-color: #2b9e4f;
 }
 
 #colorPicker {
