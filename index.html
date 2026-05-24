@@ -3,486 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanas Engine</title>
+    <title>Nanas Engine v3.0 - Full Layer Matrix</title>
     <style>
-        /* Modern Dark Mode Styling */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #121212;
-            color: #e0e0e0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Sidebar Design */
-        #sidebar {
-            width: 280px;
-            background-color: #1e1e1e;
-            border-right: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 15px;
-            overflow-y: auto;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            color: #ffb703;
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .section-title {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #888;
-            margin-top: 10px;
-            margin-bottom: 5px;
-        }
-
-        .tool-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        button, .file-label {
-            background-color: #2b2b2b;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            padding: 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        button:hover, .file-label:hover {
-            background-color: #3a3a3a;
-            border-color: #ffb703;
-        }
-
-        button.active {
-            background-color: #ffb703;
-            color: #121212;
-            font-weight: bold;
-            border-color: #ffb703;
-        }
-
-        select, input[type="color"], input[type="range"] {
-            width: 100%;
-            background-color: #2b2b2b;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            padding: 8px;
-            border-radius: 6px;
-            outline: none;
-        }
-
-        input[type="color"] {
-            height: 40px;
-            cursor: pointer;
-            padding: 2px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        /* Action Buttons (Clear, Export, Import) */
-        .action-btn {
-            border-color: #555;
-        }
-        #clearBtn { border-color: #d90429; }
-        #clearBtn:hover { background-color: #d90429; color: white; }
-
-        /* Canvas Workspace Area */
-        #workspace {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #141414;
-            position: relative;
-            padding: 20px;
-        }
-
-        canvas {
-            background-color: #ffffff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border-radius: 4px;
-            cursor: crosshair;
-        }
-
-        #status-bar {
-            position: absolute;
-            bottom: 10px;
-            left: 20px;
-            font-size: 0.8rem;
-            color: #666;
-            pointer-events: none;
-        }
+        /* CSS remains optimized for the Layer Matrix UI */
+        body { background-color: #1e1e24; color: #f5f5f7; display: flex; height: 100vh; margin: 0; font-family: sans-serif; overflow: hidden; }
+        #sidebar { width: 300px; background-color: #2b2b36; border-right: 2px solid #3d3d4f; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .layer-item { background: #3d3d4f; padding: 8px; margin: 5px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .layer-item.active { border: 1px solid #ffb703; }
+        canvas { background-color: white; cursor: crosshair; }
+        #canvas-viewport { flex: 1; display: flex; justify-content: center; align-items: center; background: #121214; }
+        button { cursor: pointer; padding: 8px; border-radius: 4px; border: none; background: #3d3d4f; color: white; }
+        button:hover { background: #4e4e66; }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR INTERFACE -->
-    <div id="sidebar">
-        <h1>Nanas Engine</h1>
-        
-        <div class="section-title">Main Tools</div>
-        <div class="tool-grid">
-            <button id="tool-brush" class="active" onclick="setTool('brush')">Brush</button>
-            <button id="tool-pencil" onclick="setTool('pencil')">Pencil</button>
-            <button id="tool-eraser" onclick="setTool('eraser')">Eraser</button>
-            <button id="tool-eyedropper" onclick="setTool('eyedropper')">Eye Dropper</button>
-            <button id="tool-bucket" onclick="setTool('bucket')">Bucket Fill</button>
-            <button id="tool-text" onclick="setTool('text')">Text Tool</button>
-        </div>
+<div id="sidebar">
+    <h2>Nanas Engine</h2>
+    <button onclick="requestNewLayerCreation()">➕ Add Layer</button>
+    <div id="layersContainer"></div>
+    <hr style="width:100%">
+    <button onclick="saveProject()">💾 Export (.nns)</button>
+    <input type="file" id="importFile" accept=".nns" style="display:none" onchange="loadProject(event)">
+    <button onclick="document.getElementById('importFile').click()">📂 Load (.nns)</button>
+</div>
 
-        <div class="section-title">Shapes (Hold Alt for perfect shape)</div>
-        <div class="tool-grid">
-            <button id="tool-square" onclick="setTool('square')">Square</button>
-            <button id="tool-circle" onclick="setTool('circle')">Circle</button>
-            <button id="tool-triangle" onclick="setTool('triangle')">Triangle</button>
-        </div>
+<div id="canvas-viewport">
+    <canvas id="paintCanvas" width="800" height="600"></canvas>
+</div>
 
-        <div class="section-title">Tool Properties</div>
-        <div class="control-group">
-            <label>Color</label>
-            <input type="color" id="colorPicker" value="#000000">
-        </div>
+<script>
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+    let layers = [];
+    let activeLayer = null;
+    let history = []; // NNS Data Stream
 
-        <!-- Dynamic Pencil Grade Selector -->
-        <div class="control-group" id="pencil-grade-container" style="display: none;">
-            <label>Pencil Grade</label>
-            <select id="pencilGrade" onchange="updatePencilGrade()">
-                <option value="10H">10H (Lightest)</option>
-                <option value="9H">9H</option>
-                <option value="8H">8H</option>
-                <option value="7H">7H</option>
-                <option value="6H">6H</option>
-                <option value="5H">5H</option>
-                <option value="4H">4H</option>
-                <option value="3H">3H</option>
-                <option value="2H">2H</option>
-                <option value="H">H</option>
-                <option value="F">F</option>
-                <option value="HB">HB</option>
-                <option value="B">B</option>
-                <option value="2B">2B</option>
-                <option value="3B">3B</option>
-                <option value="4B">4B</option>
-                <option value="5B">5B</option>
-                <option value="6B">6B</option>
-                <option value="7B">7B</option>
-                <option value="8B">8B</option>
-                <option value="9B">9B</option>
-                <option value="10B">10B</option>
-                <option value="11B">11B</option>
-                <option value="12B">12B (Darkest)</option>
-            </select>
-        </div>
+    function createLayer(name) {
+        const c = document.createElement('canvas');
+        c.width = canvas.width; c.height = canvas.height;
+        const layer = { id: Date.now().toString(), name, canvas: c, ctx: c.getContext('2d'), visible: true };
+        layers.push(layer);
+        activeLayer = layer;
+        renderLayerList();
+        draw();
+    }
 
-        <div class="control-group" id="size-container">
-            <label>Size / Thickness</label>
-            <input type="range" id="brushSize" min="1" max="100" value="10">
-        </div>
+    function requestNewLayerCreation() {
+        const name = prompt("Enter Layer Name:", "Layer " + (layers.length + 1));
+        if (name) createLayer(name);
+    }
 
-        <!-- Custom Font Upload Section -->
-        <div class="control-group id="font-container" style="display: none;">
-            <label>Text Custom Font</label>
-            <label class="file-label" for="fontUpload">Upload Font (.ttf/.otf)</label>
-            <input type="file" id="fontUpload" accept=".ttf,.otf">
-        </div>
+    function renameLayer(id) {
+        const layer = layers.find(l => l.id === id);
+        const newName = prompt("Rename layer:", layer.name);
+        if (newName) {
+            layer.name = newName;
+            renderLayerList();
+        }
+    }
 
-        <div class="section-title">Canvas Actions</div>
-        <button id="clearBtn" class="action-btn">Clear Canvas</button>
-        <button id="exportBtn" class="action-btn">Export Image (PNG)</button>
-        <label class="file-label action-btn" for="importBtn">Import Image</label>
-        <input type="file" id="importBtn" accept="image/*">
-    </div>
+    function renderLayerList() {
+        const container = document.getElementById('layersContainer');
+        container.innerHTML = '';
+        [...layers].reverse().forEach(l => {
+            const div = document.createElement('div');
+            div.className = `layer-item ${activeLayer.id === l.id ? 'active' : ''}`;
+            div.innerHTML = `<span onclick="activeLayer=layers.find(x=>x.id==='${l.id}'); renderLayerList()">${l.name}</span>
+                             <button onclick="renameLayer('${l.id}')">✏️</button>`;
+            container.appendChild(div);
+        });
+    }
 
-    <!-- MAIN APP CANVAS WORKSPACE -->
-    <div id="workspace">
-        <canvas id="paintCanvas" width="800" height="600"></canvas>
-        <div id="status-bar">Tip: Press and hold 'Alt' while creating shapes to force them into equal ratios.</div>
-    </div>
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        layers.forEach(l => { if (l.visible) ctx.drawImage(l.canvas, 0, 0); });
+    }
 
-    <!-- ENGINE APPLICATION CORE LOGIC -->
-    <script>
-        const canvas = document.getElementById('paintCanvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        
-        // App Configurations & Tools State
-        let currentTool = 'brush';
-        let isDrawing = false;
-        let startX = 0;
-        let startY = 0;
-        let snapshot = null;
-        let isAltPressed = false;
-        let activeFont = 'Arial';
-
-        // Pencil grading configurations maps opacity and base stroke values
-        const pencilGrades = {
-            '10H': { opacity: 0.05, sizeMultiplier: 0.6 }, '9H': { opacity: 0.08, sizeMultiplier: 0.6 },
-            '8H': { opacity: 0.12, sizeMultiplier: 0.7 }, '7H': { opacity: 0.15, sizeMultiplier: 0.7 },
-            '6H': { opacity: 0.18, sizeMultiplier: 0.8 }, '5H': { opacity: 0.22, sizeMultiplier: 0.8 },
-            '4H': { opacity: 0.25, sizeMultiplier: 0.9 }, '3H': { opacity: 0.30, sizeMultiplier: 0.9 },
-            '2H': { opacity: 0.35, sizeMultiplier: 1.0 }, 'H':  { opacity: 0.40, sizeMultiplier: 1.0 },
-            'F':  { opacity: 0.45, sizeMultiplier: 1.0 }, 'HB': { opacity: 0.50, sizeMultiplier: 1.1 },
-            'B':  { opacity: 0.58, sizeMultiplier: 1.1 }, '2B': { opacity: 0.64, sizeMultiplier: 1.2 },
-            '3B': { opacity: 0.70, sizeMultiplier: 1.2 }, '4B': { opacity: 0.76, sizeMultiplier: 1.3 },
-            '5B': { opacity: 0.82, sizeMultiplier: 1.3 }, '6B': { opacity: 0.86, sizeMultiplier: 1.4 },
-            '7B': { opacity: 0.90, sizeMultiplier: 1.4 }, '8B': { opacity: 0.93, sizeMultiplier: 1.5 },
-            '9B': { opacity: 0.95, sizeMultiplier: 1.5 }, '10B':{ opacity: 0.97, sizeMultiplier: 1.6 },
-            '11B':{ opacity: 0.99, sizeMultiplier: 1.6 }, '12B':{ opacity: 1.00, sizeMultiplier: 1.8 }
+    // NNS Export Protocol
+    function saveProject() {
+        const data = {
+            version: "3.0",
+            layers: layers.map(l => ({ name: l.name, data: l.canvas.toDataURL() })),
+            history: history
         };
+        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "project.nns";
+        a.click();
+    }
 
-        // DOM Element references
-        const colorPicker = document.getElementById('colorPicker');
-        const brushSize = document.getElementById('brushSize');
-        const pencilGradeSelect = document.getElementById('pencilGrade');
-        const fontUpload = document.getElementById('fontUpload');
-
-        // Track global Alt key listeners for shape normalization
-        window.addEventListener('keydown', (e) => { if (e.key === 'Alt') isAltPressed = true; });
-        window.addEventListener('keyup', (e) => { if (e.key === 'Alt') isAltPressed = false; });
-
-        // Tool Mode switcher
-        function setTool(toolName) {
-            currentTool = toolName;
-            document.querySelectorAll('#sidebar button').forEach(b => b.classList.remove('active'));
-            document.getElementById(`tool-${toolName}`).classList.add('active');
-
-            // Toggle conditional sidebar configurations UI panel assets
-            document.getElementById('pencil-grade-container').style.display = (toolName === 'pencil') ? 'flex' : 'none';
-            document.getElementById('font-container').style.display = (toolName === 'text') ? 'flex' : 'none';
-        }
-
-        // Color Converter Utility (Hex code to RGB breakdown)
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
-        }
-
-        // Flood Fill Algorithm (Bucket Tool Action Engine)
-        function floodFill(startX, startY, fillColorHex) {
-            const targetColor = ctx.getImageData(startX, startY, 1, 1).data;
-            const fillRgb = hexToRgb(fillColorHex);
-            
-            if (!fillRgb) return;
-            if (targetColor[0] === fillRgb.r && targetColor[1] === fillRgb.g && 
-                targetColor[2] === fillRgb.b && targetColor[3] === 255) return;
-
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            const width = canvas.width;
-            const height = canvas.height;
-
-            const queue = [[startX, startY]];
-            const targetR = targetColor[0];
-            const targetG = targetColor[1];
-            const targetB = targetColor[2];
-            const targetA = targetColor[3];
-
-            while (queue.length > 0) {
-                const [x, y] = queue.shift();
-                if (x < 0 || x >= width || y < 0 || y >= height) continue;
-
-                const idx = (y * width + x) * 4;
-                if (data[idx] === targetR && data[idx+1] === targetG && 
-                    data[idx+2] === targetB && data[idx+3] === targetA) {
-                    
-                    data[idx] = fillRgb.r;
-                    data[idx+1] = fillRgb.g;
-                    data[idx+2] = fillRgb.b;
-                    data[idx+3] = 255;
-
-                    queue.push([x + 1, y]);
-                    queue.push([x - 1, y]);
-                    queue.push([x, y + 1]);
-                    queue.push([x, y - 1]);
-                }
-            }
-            ctx.putImageData(imageData, 0, 0);
-        }
-
-        // Canvas Interaction Triggers
-        canvas.addEventListener('mousedown', (e) => {
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            startX = e.clientX - rect.left;
-            startY = e.clientY - rect.top;
-            
-            // Instantly snapshot context prior to shape structural changes
-            snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-            ctx.beginPath();
-            ctx.strokeStyle = colorPicker.value;
-            ctx.fillStyle = colorPicker.value;
-            ctx.lineWidth = brushSize.value;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            if (currentTool === 'brush') {
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(startX, startY);
-                ctx.stroke();
-            } else if (currentTool === 'pencil') {
-                const grade = pencilGrades[pencilGradeSelect.value];
-                const rgb = hexToRgb(colorPicker.value);
-                ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${grade.opacity})`;
-                ctx.lineWidth = Math.max(0.5, brushSize.value * grade.sizeMultiplier * 0.2);
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(startX, startY);
-                ctx.stroke();
-            } else if (currentTool === 'eraser') {
-                ctx.strokeStyle = '#ffffff'; // White out path lines
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(startX, startY);
-                ctx.stroke();
-            } else if (currentTool === 'eyedropper') {
-                isDrawing = false; 
-                executeEyedropper(startX, startY);
-            } else if (currentTool === 'bucket') {
-                isDrawing = false;
-                floodFill(Math.floor(startX), Math.floor(startY), colorPicker.value);
-            } else if (currentTool === 'text') {
-                isDrawing = false;
-                const textInput = prompt("Enter text to apply onto canvas view workspace:");
-                if (textInput) {
-                    ctx.font = `${brushSize.value * 2}px ${activeFont}`;
-                    ctx.fillText(textInput, startX, startY);
-                }
-            }
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            const currentX = e.clientX - rect.left;
-            const currentY = e.clientY - rect.top;
-
-            // Freeform tools do not clear via image snapshot arrays
-            if (currentTool === 'brush' || currentTool === 'eraser' || currentTool === 'pencil') {
-                ctx.lineTo(currentX, currentY);
-                ctx.stroke();
-            } else {
-                // Shapes re-render back onto clean snapshot buffer arrays
-                ctx.putImageData(snapshot, 0, 0);
-                
-                let width = currentX - startX;
-                let height = currentY - startY;
-
-                // Handle Alt key down state validation to ensure perfect dimension properties
-                if (isAltPressed) {
-                    const absSide = Math.max(Math.abs(width), Math.abs(height));
-                    width = width < 0 ? -absSide : absSide;
-                    height = height < 0 ? -absSide : absSide;
-                }
-
-                ctx.beginPath();
-                if (currentTool === 'square') {
-                    ctx.strokeRect(startX, startY, width, height);
-                } else if (currentTool === 'circle') {
-                    const radius = Math.sqrt(width * width + height * height);
-                    ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
-                    ctx.stroke();
-                } else if (currentTool === 'triangle') {
-                    ctx.moveTo(startX + width / 2, startY);
-                    ctx.lineTo(startX, startY + height);
-                    ctx.lineTo(startX + width, startY + height);
-                    ctx.closePath();
-                    ctx.stroke();
-                }
-            }
-        });
-
-        canvas.addEventListener('mouseup', () => isDrawing = false);
-        canvas.addEventListener('mouseleave', () => isDrawing = false);
-
-        // Eyedropper Functionality
-        function executeEyedropper(x, y) {
-            const pixel = ctx.getImageData(x, y, 1, 1).data;
-            // Check if alpha channel is 0 (fully transparent white background default)
-            if (pixel[3] === 0) {
-                colorPicker.value = "#ffffff";
-                return;
-            }
-            const hex = "#" + ("000000" + ((pixel[0] << 16) | (pixel[1] << 8) | pixel[2]).toString(16)).slice(-6);
-            colorPicker.value = hex;
-        }
-
-        // Custom Font Upload Handling via dynamic CSS injection API
-        fontUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const fontName = 'CustomUploadedFont';
-                    const fontFace = new FontFace(fontName, event.target.result);
-                    fontFace.load().then((loadedFace) => {
-                        document.fonts.add(loadedFace);
-                        activeFont = fontName;
-                        alert("Custom font parsed and active inside Text Tool module!");
-                    }).catch(err => alert("Error parsing custom font configuration framework: " + err));
+    // NNS Import Protocol
+    function loadProject(e) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const json = JSON.parse(event.target.result);
+            layers = [];
+            json.layers.forEach(l => {
+                const img = new Image();
+                img.onload = () => {
+                    createLayer(l.name);
+                    activeLayer.ctx.drawImage(img, 0, 0);
+                    draw();
                 };
-                reader.readAsArrayBuffer(file);
-            }
-        });
+                img.src = l.data;
+            });
+        };
+        reader.readAsText(e.target.files[0]);
+    }
 
-        // App Workspace Utilities Action Sets
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            if (confirm("Are you sure you want to clear the entire canvas scene?")) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-        });
-
-        document.getElementById('exportBtn').addEventListener('click', () => {
-            const link = document.createElement('a');
-            link.download = 'nanas-engine-export.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        });
-
-        document.getElementById('importBtn').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        // Scale image fitting properties bounding directly into canvas dimension slots
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    }
-                    img.src = event.target.result;
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-    </script>
+    // Init
+    createLayer("Background");
+</script>
 </body>
 </html>
