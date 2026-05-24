@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🍍 NANAS ENGINE - INTERFACE UPGRADE V2
+   🍍 NANAS ENGINE - COMPLETE UNIFIED WORKSPACE STYLING
    ========================================================================== */
 
 :root {
@@ -9,7 +9,6 @@
   
   /* Accent States */
   --accent-primary: #ffe600;      /* Signature Pineapple Yellow */
-  --accent-primary-hover: #fff066;
   --accent-danger: #ff4d4d;
   --accent-success: #2ecc71;
   
@@ -25,7 +24,7 @@
   --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 🌌 Reset Framework Layouts */
+/* 🌌 Global Reset Framework */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -92,7 +91,7 @@ canvas {
   -webkit-backdrop-filter: blur(var(--blur-strength));
 }
 
-/* 🍍 Nanas Mini Logo Placement */
+/* 🍍 Brand Placement */
 #logoContainer {
   display: flex;
   align-items: center;
@@ -107,7 +106,7 @@ canvas {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
-/* 🔗 Segments and Separator Grids */
+/* 🔗 Segments and Separators */
 .tool-section {
   display: flex;
   align-items: center;
@@ -124,7 +123,7 @@ canvas {
 }
 
 /* ==========================================================================
-   🕹️ CORE UI INTERACTION ELEMENTS (BUTTONS & SELECTORS)
+   🕹️ TOOLS & BUTTON INTERACTION CONFIGURATIONS
    ========================================================================== */
 
 .tool-btn, .action-btn {
@@ -148,7 +147,7 @@ canvas {
   color: var(--text-bright);
 }
 
-/* ⭐ Active Tool Highlight Loop States */
+/* ⭐ Active Highlights */
 .tool-btn.active {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
@@ -157,7 +156,7 @@ canvas {
   box-shadow: 0 4px 12px rgba(255, 230, 0, 0.25);
 }
 
-/* 🔵 File Action Styles */
+/* 🔵 File Import Action */
 .action-btn.import-style {
   background: rgba(44, 130, 201, 0.15);
   border-color: rgba(44, 130, 201, 0.25);
@@ -170,7 +169,7 @@ canvas {
   color: #7fbfeb;
 }
 
-/* 🔴 Destructive Clear Action Styling */
+/* 🔴 Clear Screen Action */
 .action-btn.clear-style {
   background: rgba(255, 77, 77, 0.1);
   border-color: rgba(255, 77, 77, 0.2);
@@ -185,8 +184,25 @@ canvas {
 }
 
 /* ==========================================================================
-   📂 BLACK EXPORT DROPDOWN STYLING
+   📂 DROPDOWNS & FORMAT SELECTORS (BLACK MATRIX MODIFIERS)
    ========================================================================== */
+
+/* 1️⃣ Split-Button Format Selector */
+.format-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-inner);
+  overflow: hidden;
+  height: 34px;
+  transition: var(--transition-smooth);
+}
+
+.format-group:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
 
 #exportFormat {
   background: transparent;
@@ -201,18 +217,70 @@ canvas {
   cursor: pointer;
   display: flex;
   align-items: center;
-  -webkit-appearance: none; /* Removes standard browser arrow mapping */
   appearance: none;
+  -webkit-appearance: none;
 }
 
-/* 🖤 Makes the actual popup menu options pitch black */
-#exportFormat option {
+.format-group .action-btn.export-style {
+  border: none;
+  border-radius: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(46, 204, 113, 0.15);
+  color: #4ed98a;
+  height: 100%;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.format-group .action-btn.export-style:hover {
+  background: var(--accent-success);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.25);
+}
+
+/* 2️⃣ In-Line Font Selector */
+#fontSelectorGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#fontSelect {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-inner);
+  color: var(--text-bright);
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  height: 34px;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: var(--transition-smooth);
+}
+
+#fontSelect:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 🖤 Shared Pitch-Black Context Menu Lists */
+#exportFormat option,
+#fontSelect option {
   background-color: #000000;
   color: var(--text-normal);
   padding: 8px;
 }
+
 /* ==========================================================================
-   🎨 TOOL SPECIFIC MODIFIERS (COLOR & TRACK BRUSH RANGE)
+   🎨 ATTRIBUTE SLIDERS & PICKERS
    ========================================================================== */
 
 #colorPicker {
@@ -275,17 +343,6 @@ canvas {
   font-variant-numeric: tabular-nums;
   min-width: 38px;
   text-align: right;
-}
-
-#fontSelect {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-inner);
-  color: var(--text-bright);
-  padding: 6px 10px;
-  font-size: 12px;
-  outline: none;
-  cursor: pointer;
 }
 
 /* ==========================================================================
