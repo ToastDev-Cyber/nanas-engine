@@ -6,7 +6,7 @@ const brushSize = document.getElementById('brushSize');
 const sizeVal = document.getElementById('sizeVal');
 const clearBtn = document.getElementById('clearBtn');
 
-// Tool buttons and font dropdown
+// Tool controls
 const brushTool = document.getElementById('brushTool');
 const squareTool = document.getElementById('squareTool');
 const circleTool = document.getElementById('circleTool');
@@ -15,10 +15,10 @@ const fontSelect = document.getElementById('fontSelect');
 const fontSelectorGroup = document.getElementById('fontSelectorGroup');
 
 let isDrawing = false;
-let currentTool = 'brush'; // Options: 'brush', 'square', 'circle', 'text'
-let startX, startY;        // Holds initial click coordinates
-let snapshot;              // Holds image data to prevent shape tearing
-let activeTextArea = null; // Tracks current live typing element
+let currentTool = 'brush'; // Setup options: 'brush', 'square', 'circle', 'text'
+let startX, startY;        
+let snapshot;              
+let activeTextArea = null; 
 
 // ==========================================
 // 🍍 REPOSITORY FONT FILE TRACKER
@@ -27,10 +27,10 @@ const REPO_FONTS = {
     "edosz.ttf": "Edo SZ"
 };
 
-// Track loaded font families internally
+// Internal map tracking loaded custom fonts
 const loadedFontsMap = new Map();
 
-// Loads edosz.ttf from the main folder and sets up the dropdown selector
+// Pulls your custom ttf asset and registers it cleanly into your tool selector
 function loadRepositoryFonts() {
     Object.entries(REPO_FONTS).forEach(([fontFile, displayName]) => {
         const fontID = fontFile.split('.')[0]; 
@@ -40,7 +40,7 @@ function loadRepositoryFonts() {
             document.fonts.add(loadedFont);
             loadedFontsMap.set(fontID, true);
             
-            // Inject into the selector list
+            // Generate dropdown item option dynamically
             const option = document.createElement('option');
             option.value = fontID;
             option.textContent = displayName;
@@ -54,6 +54,7 @@ function loadRepositoryFonts() {
 }
 loadRepositoryFonts();
 
+// Smart workspace scaling handler
 function resizeCanvas() {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width;
@@ -61,9 +62,8 @@ function resizeCanvas() {
     const tempCtx = tempCanvas.getContext('2d');
     tempCtx.drawImage(canvas, 0, 0);
 
-    const toolbarOffset = document.getElementById('toolbar').offsetHeight;
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - toolbarOffset;
+    canvas.height = window.innerHeight;
 
     ctx.drawImage(tempCanvas, 0, 0);
     ctx.lineCap = 'round';
@@ -73,6 +73,7 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 setTimeout(resizeCanvas, 1);
 
+// Utility coordinate normalizer
 function getCoordinates(e) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -84,6 +85,7 @@ function getCoordinates(e) {
 }
 
 function startDrawing(e) {
+    // If user clicks down while actively typing elsewhere, process and stamp down the text first
     if (activeTextArea) {
         finalizeText();
         return;
@@ -167,13 +169,14 @@ function createTextbox(x, y) {
     textarea.style.color = colorPicker.value;
     textarea.style.fontSize = `${brushSize.value}px`;
     
-    // Preview the font selection style directly inside the input box
+    // Preview the chosen font family instantly while typing
     const selectedFont = fontSelect.value;
     textarea.style.fontFamily = selectedFont === 'sans-serif' ? 'sans-serif' : `"${selectedFont}"`;
 
     textarea.style.width = '200px';
     textarea.style.height = `${parseInt(brushSize.value) + 10}px`;
 
+    // Dynamic scale helper as typing grows
     textarea.addEventListener('input', () => {
         textarea.style.width = 'auto';
         textarea.style.width = `${textarea.scrollWidth + 20}px`;
@@ -181,7 +184,9 @@ function createTextbox(x, y) {
     });
 
     container.appendChild(textarea);
-    textarea.focus();
+    
+    // Auto-focus text editor field box instantly
+    setTimeout(() => { textarea.focus(); }, 50);
     activeTextArea = textarea;
 }
 
@@ -190,7 +195,8 @@ function finalizeText() {
 
     const text = activeTextArea.value;
     const x = parseInt(activeTextArea.style.left, 10);
-    const y = parseInt(activeTextArea.style.top, 10) + parseInt(brushSize.value, 10) * 0.85;
+    // Align vertical typography drop safely relative to brush font size setup
+    const y = parseInt(activeTextArea.style.top, 10) + parseInt(brushSize.value, 10) * 0.82;
 
     if (text.trim() !== "") {
         ctx.fillStyle = colorPicker.value;
@@ -206,7 +212,7 @@ function finalizeText() {
         let currentY = y;
         lines.forEach(line => {
             ctx.fillText(line, x, currentY);
-            currentY += parseInt(brushSize.value, 10);
+            currentY += parseInt(brushSize.value, 10) * 1.05; // Standard text line height spacing offset
         });
     }
 
@@ -222,13 +228,13 @@ function updateFontSelectorVisibility() {
     }
 }
 
-// Click Listeners
+// Global UI Input Action Listeners
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseleave', stopDrawing);
 
-// Touch Support
+// Full Mobile Layout Touch Integrations
 canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, { passive: false });
 canvas.addEventListener('touchend', stopDrawing);
 canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
