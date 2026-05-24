@@ -3,74 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanas Engine</title>
+    <title>Nanas Engine - Workspace</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- 🗺️ Core Engine Viewport Container -->
     <div id="canvasContainer">
+        <!-- 🎛️ VERTICAL LEFT-SIDEBAR CONTROL TOOLBAR -->
+        <div id="toolbar">
+            <div id="logoContainer">
+                <!-- Replace with your actual asset path if you have an engine logo -->
+                <strong style="color: #fff; font-family: sans-serif; font-size: 14px; letter-spacing: 1px;">NANAS ENGINE</strong>
+            </div>
+
+            <div class="separator"></div>
+
+            <!-- 🖌️ Core Drawing Utilities Section -->
+            <div class="tool-section">
+                <button id="brushTool" class="tool-btn active">🖌️ Brush</button>
+                <button id="pencilTool" class="tool-btn">✏️ Pencil</button>
+                <button id="eraserTool" class="tool-btn">🧼 Eraser</button>
+                <button id="eyedropperTool" class="tool-btn">🧪 Eyedropper</button>
+                <button id="bucketTool" class="tool-btn">🪣 Bucket</button>
+            </div>
+
+            <div class="separator"></div>
+
+            <!-- 📐 Structural Shapes Section -->
+            <div class="tool-section">
+                <button id="lineTool" class="tool-btn">📏 Line</button>
+                <button id="triangleTool" class="tool-btn">🔺 Triangle</button>
+                <button id="squareTool" class="tool-btn">⬜ Square</button>
+                <button id="circleTool" class="tool-btn">⭕ Circle</button>
+                <button id="textTool" class="tool-btn">🔤 Text</button>
+            </div>
+
+            <div class="separator"></div>
+
+            <!-- ⚙️ Context-Dependent Parameters Section -->
+            <div class="tool-section">
+                <div class="slider-group">
+                    <label for="colorPicker" style="color:#aaa; font-size:11px;">COLOR</label>
+                    <input type="color" id="colorPicker" value="#000000">
+                </div>
+                
+                <div class="slider-group" id="brushSizeGroup">
+                    <label for="brushSize" style="color:#aaa; font-size:11px;">BRUSH SIZE</label>
+                    <input type="range" id="brushSize" min="1" max="50" value="5">
+                    <span id="sizeVal" style="color:#fff; font-size:12px;">5px</span>
+                </div>
+
+                <!-- ✏️ Dynamic Graphite Pencil Hardness Grade Selection Panel -->
+                <div class="slider-group" id="pencilGradeGroup" style="display: none;">
+                    <label for="pencilGrade" style="color:#aaa; font-size:11px;">LEAD GRADE</label>
+                    <select id="pencilGrade" style="background: #222; color: #fff; border: 1px solid #44px; padding: 4px; border-radius: 4px; width: 100%;">
+                        <option value="6H">6H (Hardest / Extremely Light)</option>
+                        <option value="4H">4H</option>
+                        <option value="2H">2H</option>
+                        <option value="H">H</option>
+                        <option value="HB" selected>HB (Medium Balance)</option>
+                        <option value="B">B</option>
+                        <option value="2B">2B</option>
+                        <option value="4B">4B</option>
+                        <option value="6B">6B</option>
+                        <option value="8B">8B</option>
+                        <option value="10B">10B</option>
+                        <option value="12B">12B (Softest / Ultra Dark)</option>
+                    </select>
+                </div>
+
+                <!-- 🔤 Dynamic Custom Font Selector Wrapper -->
+                <div class="slider-group" id="fontSelectorGroup" style="display: none;">
+                    <label for="fontSelect" style="color:#aaa; font-size:11px;">TYPOGRAPHY</label>
+                    <select id="fontSelect" style="background: #222; color: #fff; border: 1px solid #44px; padding: 4px; border-radius: 4px; width: 100%;">
+                        <option value="sans-serif">System Sans-Serif</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="separator"></div>
+
+            <!-- 📂 System Operations Group -->
+            <div class="tool-section right-align">
+                <button id="clearBtn" class="action-btn" style="background: #d9534f; color:#fff;">🗑️ Clear All</button>
+                
+                <div class="format-group" style="display:flex; flex-direction:column; gap:4px; width:100%;">
+                    <select id="exportFormat" style="background: #222; color: #fff; border: 1px solid #44px; padding: 4px; border-radius: 4px;">
+                        <option value="image/png">PNG Format</option>
+                        <option value="image/jpeg">JPEG Format</option>
+                        <option value="image/webp">WEBP Format</option>
+                    </select>
+                    <button id="exportBtn" class="action-btn" style="background: #5cb85c; color:#fff;">💾 Export File</button>
+                </div>
+
+                <button id="importBtn" class="action-btn" style="background: #0275d8; color:#fff;">📂 Import Image</button>
+                <input type="file" id="imageImporter" accept="image/*" style="display: none;">
+            </div>
+        </div>
+
+        <!-- 🖼️ THE MAIN HARDWARE CANVAS ELEMENT -->
         <canvas id="paintCanvas"></canvas>
     </div>
 
-    <!-- 🎛️ Unified Command Bar / Floating Control Deck -->
-    <div id="toolbar">
-        
-        <!-- 🍍 Nanas Engine Mini Brand Identity Icon -->
-        <div id="logoContainer">
-            <img src="logo.png" alt="Nanas Engine Logo" id="engineLogo">
-        </div>
-
-        <!-- 🛠️ Main Tool Execution Suite -->
-        <div class="tool-section separator">
-            <button id="brushTool" class="tool-btn active">🖌️ Brush</button>
-            <button id="bucketTool" class="tool-btn">🪣 Bucket</button>
-            <button id="squareTool" class="tool-btn">⬜ Square</button>
-            <button id="circleTool" class="tool-btn">⭕ Circle</button>
-            <button id="textTool" class="tool-btn">🔤 Text</button>
-            <button id="eraserTool" class="tool-btn">🧼 Eraser</button>
-            <button id="eyedropperTool" class="tool-btn">🧪 Eyedropper</button>
-            <button id="lineTool" class="tool-btn">📏 Line</button>
-        </div>
-
-        <!-- 🎨 Vector Input Properties Panel -->
-        <div class="tool-section separator">
-            <input type="color" id="colorPicker" value="#000000" title="Select Tool Color">
-            <div class="slider-group">
-                <input type="range" id="brushSize" min="5" max="100" value="20">
-                <span id="sizeVal">20px</span>
-            </div>
-        </div>
-
-        <!-- 🔤 Typography Controller Module (Injected via JS loop engine) -->
-        <div id="fontSelectorGroup" class="tool-section" style="display: none;">
-            <label for="fontSelect">Font:</label>
-            <select id="fontSelect">
-                <option value="sans-serif">System Sans-Serif</option>
-                <!-- Edo SZ option link initialized right here by app.js engine font face resolver -->
-            </select>
-        </div>
-
-        <!-- 💾 File Management Terminal Section -->
-        <div class="tool-section separator right-align">
-            <!-- Hidden binary input link element for importing images natively -->
-            <input type="file" id="imageImporter" accept="image/png, image/jpeg, image/webp" style="display: none;">
-            <button id="importBtn" class="action-btn import-style">📂 Import</button>
-            
-            <div class="format-group">
-                <select id="exportFormat" title="Bitmap Export Type Target">
-                    <option value="image/png">.PNG (Lossless)</option>
-                    <option value="image/jpeg">.JPG (Compressed)</option>
-                    <option value="image/webp">.WEBP (Modern)</option>
-                </select>
-                <button id="exportBtn" class="action-btn export-style">💾 Export</button>
-            </div>
-            
-            <button id="clearBtn" class="action-btn clear-style">🗑️ Clear</button>
-        </div>
-    </div>
-
-    <!-- Core Engine Scripts -->
     <script src="app.js"></script>
 </body>
 </html>
