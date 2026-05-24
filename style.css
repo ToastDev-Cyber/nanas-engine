@@ -42,6 +42,7 @@ canvas {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
     z-index: 100;
+    max-width: 95vw;
 }
 
 /* 🍍 Small Logo Rules */
@@ -73,6 +74,32 @@ canvas {
     margin-left: auto;
 }
 
+/* 📂 Formats Input Interface Combination Unit Layout */
+.format-group {
+    display: flex;
+    align-items: center;
+    background-color: #2a2a2a;
+    border: 1px solid #555;
+    border-radius: 6px;
+    overflow: hidden;
+    padding-left: 5px;
+}
+
+#exportFormat {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    padding: 4px 5px;
+}
+
+#exportFormat option {
+    background-color: #222;
+    color: #fff;
+}
+
 /* 🕹️ Buttons and Sliders */
 .tool-btn, .action-btn {
     background-color: #2a2a2a;
@@ -98,24 +125,35 @@ canvas {
     font-weight: 600;
 }
 
-/* Red Delete Accent */
-.action-btn {
+/* 🔵 Blue Import Accent */
+.action-btn.import-style {
+    background-color: #1b537e;
+    border-color: #2572ad;
+}
+
+.action-btn.import-style:hover {
+    background-color: #2572ad;
+}
+
+/* 🟢 Green Export Accent Modification */
+.format-group .action-btn.export-style {
+    border: none;
+    border-radius: 0;
+    background-color: #1e6b36;
+}
+
+.format-group .action-btn.export-style:hover {
+    background-color: #2b9e4f;
+}
+
+/* 🔴 Red Clear Accent */
+.action-btn.clear-style {
     background-color: #8c2020;
     border-color: #b33636;
 }
 
-.action-btn:hover {
+.action-btn.clear-style:hover {
     background-color: #b33636;
-}
-
-/* 🟢 Green Saving Accent */
-.action-btn.export-style {
-    background-color: #1e6b36;
-    border-color: #2b9e4f;
-}
-
-.action-btn.export-style:hover {
-    background-color: #2b9e4f;
 }
 
 #colorPicker {
