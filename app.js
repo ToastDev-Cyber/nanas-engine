@@ -1,6 +1,5 @@
 /**
  * Nanas Engine - Application Logic Core (v3.0 Layer Matrix Edition)
- * Handles full layer management pipelines, history tracking, and composite .nns file configurations.
  */
 
 // Initialize primary HTML viewport canvas properties
@@ -43,15 +42,24 @@ const brushSize = document.getElementById('brushSize');
 const globalOpacity = document.getElementById('globalOpacity');
 const pencilGradeSelect = document.getElementById('pencilGrade');
 const fontUpload = document.getElementById('fontUpload');
-const layersContainer = document.getElementById('layersContainer'); // Target container block for Layer list UI
+const layersContainer = document.getElementById('layersContainer');
 
 /* ==========================================================================
-   1. LAYER MANAGEMENT ENGINE CORE
+   1. LAYER MANAGEMENT ENGINE CORE (WITH CUSTOM NAMING OVERRIDES)
    ========================================================================== */
 
-/**
- * Creates an independent offscreen canvas plane and pushes it to the layers directory.
- */
+// Helper to handle interactive layer generation prompting
+function requestNewLayerCreation() {
+    const defaultLayerName = `Layer ${layers.length + 1}`;
+    const targetCustomName = prompt("Enter custom layer signature identification tag:", defaultLayerName);
+    
+    // Fall back gracefully if user cancels execution action path
+    if (targetCustomName === null) return; 
+    
+    const validName = targetCustomName.trim() === "" ? defaultLayerName : targetCustomName.trim();
+    createLayer(validName);
+}
+
 function createLayer(name = `Layer ${layers.length + 1}`, visible = true, opacity = 1.0) {
     const layerCanvas = document.createElement('canvas');
     layerCanvas.width = mainCanvas.width;
@@ -74,9 +82,26 @@ function createLayer(name = `Layer ${layers.length + 1}`, visible = true, opacit
     return targetLayer;
 }
 
-/**
- * Changes active structural drawing context paths over to the designated layer.
- */
+function renameLayerInline(id) {
+    const targetLayer = layers.find(l => l.id === id);
+    if (!targetLayer) return;
+
+    const modifiedName = prompt(`Enter new naming attribute designation for "${targetLayer.name}":`, targetLayer.name);
+    if (modifiedName !== null && modifiedName.trim() !== "") {
+        const oldName = targetLayer.name;
+        targetLayer.name = modifiedName.trim();
+        
+        actionHistory.push({ 
+            tool: 'system_rename_layer', 
+            layerId: id, 
+            oldName: oldName, 
+            newName: targetLayer.name 
+        });
+        
+        updateLayersUI();
+    }
+}
+
 function selectLayer(id) {
     const target = layers.find(l => l.id === id);
     if (target) {
@@ -85,9 +110,6 @@ function selectLayer(id) {
     }
 }
 
-/**
- * Destroys a layer element and updates workspace parameters.
- */
 function deleteLayer(id) {
     if (layers.length <= 1) {
         alert("Cannot delete the final workspace layer structure.");
@@ -96,12 +118,10 @@ function deleteLayer(id) {
     const targetIndex = layers.findIndex(l => l.id === id);
     if (targetIndex !== -1) {
         layers.splice(targetIndex, 1);
-        // Shift context over to safety boundary array steps
         if (activeLayer.id === id) {
             activeLayer = layers[Math.max(0, targetIndex - 1)];
         }
         
-        // Log operation history track for .nns file sync
         actionHistory.push({ tool: 'system_delete_layer', layerId: id });
         
         updateLayersUI();
@@ -109,30 +129,22 @@ function deleteLayer(id) {
     }
 }
 
-/**
- * Composites and flattens all visible active layer configurations onto the viewport.
- */
 function composeLayersToViewport() {
     mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
     
-    // Draw canvas nodes sequentially from bottom (Index 0) to top layer
     layers.forEach(layer => {
-        if (layer.visible) {
-            mainCtx.globalAlpha = layer.opacity;
-            mainCtx.drawImage(layer.canvas, 0, 0);
-        }
-    });
-    mainCtx.globalAlpha = 1.0; // Restore global baseline values
+                if (layer.visible) {
+                    mainCtx.globalAlpha = layer.opacity;
+                    mainCtx.drawImage(layer.canvas, 0, 0);
+                }
+            });
+            mainCtx.globalAlpha = 1.0; 
 }
 
-/**
- * Synchronizes layout data to update the sidebar layer manager list UI elements dynamically.
- */
 function updateLayersUI() {
     if (!layersContainer) return;
     layersContainer.innerHTML = '';
 
-    // Render layers backwards so top layer physically shows on top of the list stack
     [...layers].reverse().forEach(layer => {
         const item = document.createElement('div');
         item.className = `layer-item ${activeLayer.id === layer.id ? 'active' : ''}`;
@@ -141,19 +153,20 @@ function updateLayersUI() {
         item.style.justifyContent = 'space-between';
         item.style.margin = '4px 0';
         item.style.padding = '6px';
-        item.style.border = '1px solid #ccc';
-        item.style.background = activeLayer.id === layer.id ? '#ddd' : '#fff';
 
         item.innerHTML = `
-            <span class="layer-name" style="cursor:pointer; font-weight:${activeLayer.id === layer.id ? 'bold' : 'normal'}">${layer.name}</span>
-            <div>
-                <button class="layer-toggle-vis" title="Toggle Visibility">${layer.visible ? '👁️' : '❌'}</button>
-                <button class="layer-delete-btn" title="Delete Layer">🗑️</button>
+            <span class="layer-name" title="Click to select, Double-Click to rename" style="cursor:pointer; font-weight:${activeLayer.id === layer.id ? 'bold' : 'normal'}">${layer.name}</span>
+            <div class="layer-controls-right">
+                <button class="layer-toggle-vis">${layer.visible ? '👁️' : '❌'}</button>
+                <button class="layer-delete-btn">🗑️</button>
             </div>
         `;
 
-        // Interactive bindings tracking UI interaction
+        // Selection Trigger Handler
         item.querySelector('.layer-name').addEventListener('click', () => selectLayer(layer.id));
+        
+        // Inline Double-Click Editor Trigger Action block
+        item.querySelector('.layer-name').addEventListener('dblclick', () => renameLayerInline(layer.id));
         
         item.querySelector('.layer-toggle-vis').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -179,7 +192,9 @@ function updateLayersUI() {
 function setTool(toolName) {
     currentTool = toolName;
     document.querySelectorAll('#sidebar button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`tool-${toolName}`).classList.add('active');
+    const targetBtn = document.getElementById(`tool-${toolName}`);
+    if (targetBtn) targetBtn.classList.add('active');
+    
     document.getElementById('pencil-grade-container').style.display = (toolName === 'pencil') ? 'flex' : 'none';
     document.getElementById('font-container').style.display = (toolName === 'text') ? 'flex' : 'none';
     document.getElementById('opacity-container').style.display = (toolName === 'pencil' || toolName === 'eraser' || toolName === 'eyedropper' || toolName === 'bucket') ? 'none' : 'flex';
@@ -198,9 +213,6 @@ function hexToRgbaStr(hex, opacityAlpha) {
 window.addEventListener('keydown', (e) => { if (e.key === 'Alt') isAltPressed = true; });
 window.addEventListener('keyup', (e) => { if (e.key === 'Alt') isAltPressed = false; });
 
-/**
- * Runs 4-way queue fill algorithm targeting specific offscreen context layers.
- */
 function floodFill(targetCtx, targetCanvas, xPosition, yPosition, fillColorHex, recordAction = true, targetLayerId = null) {
     const initialPixel = targetCtx.getImageData(xPosition, yPosition, 1, 1).data;
     const targetColor = hexToRgb(fillColorHex);
@@ -258,14 +270,13 @@ function floodFill(targetCtx, targetCanvas, xPosition, yPosition, fillColorHex, 
    ========================================================================== */
 
 mainCanvas.addEventListener('mousedown', (e) => {
-    if (!activeLayer || !activeLayer.visible) return; // Prevent hidden layers from receiving inputs
+    if (!activeLayer || !activeLayer.visible) return; 
     isDrawing = true;
 
     const rect = mainCanvas.getBoundingClientRect();
     startX = Math.floor(e.clientX - rect.left);
     startY = Math.floor(e.clientY - rect.top);
     
-    // Capture state of the active offscreen workspace layer
     activeLayer.snapshot = activeLayer.ctx.getImageData(0, 0, mainCanvas.width, mainCanvas.height);
     const currentAlpha = globalOpacity.value / 100;
 
@@ -294,7 +305,6 @@ mainCanvas.addEventListener('mousedown', (e) => {
         composeLayersToViewport();
     } else if (currentTool === 'eyedropper') {
         isDrawing = false;
-        // Sample color from global flattened view instead of isolated single layer
         const targetPixel = mainCtx.getImageData(startX, startY, 1, 1).data;
         if (targetPixel[3] !== 0) {
             colorPicker.value = "#" + ("000000" + ((targetPixel[0] << 16) | (targetPixel[1] << 8) | targetPixel[2]).toString(16)).slice(-6);
@@ -342,7 +352,6 @@ mainCanvas.addEventListener('mousemove', (e) => {
         currentStrokePoints.push({ x: currentX, y: currentY });
         composeLayersToViewport();
     } else {
-        // Redraw only the single active layer from its snapshot to avoid cross-layer blending artifacts
         targetCtx.putImageData(activeLayer.snapshot, 0, 0);
         
         let deltaWidth = currentX - startX;
@@ -419,24 +428,16 @@ mainCanvas.addEventListener('mouseleave', () => isDrawing = false);
    4. ADVANCED .NNS PROTOCOL ENCODER / DECODER
    ========================================================================== */
 
-/**
- * Parses structural layer setup instructions and reruns vector calculations.
- */
 function rebuildWorkspaceFromNns(nnsProjectData) {
-    // Clear structural states entirely
     layers = [];
     actionHistory = [];
     
-    // 1. Rebuild the layered workspace architecture map
     nnsProjectData.layersStructure.forEach(layerMeta => {
         createLayer(layerMeta.name, layerMeta.visible, layerMeta.opacity);
-        // Retain matching reference identities across vectors
         layers[layers.length - 1].id = layerMeta.id; 
     });
 
-    // 2. Map and bind history array operations onto targets
     nnsProjectData.history.forEach(action => {
-        // Intercept structural layer updates
         if (action.tool === 'system_toggle_layer') {
             const match = layers.find(l => l.id === action.layerId);
             if (match) match.visible = action.visible;
@@ -449,8 +450,13 @@ function rebuildWorkspaceFromNns(nnsProjectData) {
             actionHistory.push(action);
             return;
         }
+        if (action.tool === 'system_rename_layer') {
+            const match = layers.find(l => l.id === action.layerId);
+            if (match) match.name = action.newName;
+            actionHistory.push(action);
+            return;
+        }
 
-        // Trace and assign targeting layer boundaries
         const activeLayerRef = layers.find(l => l.id === action.layerId);
         if (!activeLayerRef) return; 
 
@@ -504,15 +510,12 @@ function rebuildWorkspaceFromNns(nnsProjectData) {
         actionHistory.push(action);
     });
 
-    // Enforce matching layer context selection on the interface layout viewports
     if (layers.length > 0) selectLayer(layers[layers.length - 1].id);
     updateLayersUI();
     composeLayersToViewport();
 }
 
-// Custom Nanas Engine Export Logic Layer Sync (.nns)
-document.getElementById('exportNnsBtn')?.addEventListener('click', () => {
-    // Structural compression profile capturing layer layout arrangements
+document.getElementById('exportNnsBtn').addEventListener('click', () => {
     const packedLayersMeta = layers.map(l => ({
         id: l.id,
         name: l.name,
@@ -536,7 +539,6 @@ document.getElementById('exportNnsBtn')?.addEventListener('click', () => {
     fileAnchorElement.click();
 });
 
-// Import Processing Pipeline (Handles .nns Layers + Normal Flat Images fallback)
 document.getElementById('importBtn').addEventListener('change', (e) => {
     const importedFile = e.target.files[0];
     if (!importedFile) return;
@@ -552,7 +554,6 @@ document.getElementById('importBtn').addEventListener('change', (e) => {
                     rebuildWorkspaceFromNns(parsedProject);
                     alert("Layered project workspace setup complete!");
                 } else if (parsedProject.engineSignature === "NANAS_ENGINE_VECTOR_DATA") {
-                    // Legacy non-layer support upgrade wrapper tracking
                     alert("Legacy single-layer workspace profile detected. Converting project configuration format...");
                     const updatedWrapper = {
                         layersStructure: [{ id: 'layer_default', name: 'Layer 1', visible: true, opacity: 1.0 }],
@@ -568,7 +569,6 @@ document.getElementById('importBtn').addEventListener('change', (e) => {
         };
         fileReader.readAsText(importedFile);
     } else {
-        // Flat traditional structural fallback layout configurations
         const readerInstance = new FileReader();
         readerInstance.onload = function(event) {
             const runtimeImageContainer = new Image();
@@ -585,7 +585,24 @@ document.getElementById('importBtn').addEventListener('change', (e) => {
     }
 });
 
-// Clear canvas initialization logic
+fontUpload.addEventListener('change', (e) => {
+    const targetFile = e.target.files[0];
+    if (targetFile) {
+        const fileReader = new FileReader();
+        fileReader.onload = function(event) {
+            const temporaryFontName = 'DynamicUploadedFont';
+            const convertedFontFace = new FontFace(temporaryFontName, event.target.result);
+            
+            convertedFontFace.load().then((loadedFont) => {
+                document.fonts.add(loadedFont);
+                activeFont = temporaryFontName;
+                alert("Font configuration accepted and linked directly with the Text tool.");
+            }).catch(() => alert("Font array compilation failure. Please check your source file extensions (.ttf/.otf)."));
+        };
+        fileReader.readAsArrayBuffer(targetFile);
+    }
+});
+
 document.getElementById('clearBtn').addEventListener('click', () => {
     if (confirm("Reset current canvas layers? All unstored modifications will be dropped.")) {
         layers = [];
@@ -595,7 +612,6 @@ document.getElementById('clearBtn').addEventListener('click', () => {
     }
 });
 
-// Flattened Image Export Output (.png)
 document.getElementById('exportBtn').addEventListener('click', () => {
     const fileAnchorElement = document.createElement('a');
     fileAnchorElement.download = 'nanas-engine-flattened-output.png';
@@ -603,8 +619,6 @@ document.getElementById('exportBtn').addEventListener('click', () => {
     fileAnchorElement.click();
 });
 
-// Engine Boot Trigger Configuration Initialization
 document.addEventListener("DOMContentLoaded", () => {
-    // Generate base workspace fallback block layer array setup 
     createLayer('Background Base');
 });
