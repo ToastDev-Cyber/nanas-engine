@@ -2,30 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanas Engine v3.0 - Full Layer Matrix</title>
+    <title>Nanas Engine - Full Edition</title>
     <style>
-        /* CSS remains optimized for the Layer Matrix UI */
-        body { background-color: #1e1e24; color: #f5f5f7; display: flex; height: 100vh; margin: 0; font-family: sans-serif; overflow: hidden; }
-        #sidebar { width: 300px; background-color: #2b2b36; border-right: 2px solid #3d3d4f; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .layer-item { background: #3d3d4f; padding: 8px; margin: 5px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .layer-item.active { border: 1px solid #ffb703; }
-        canvas { background-color: white; cursor: crosshair; }
-        #canvas-viewport { flex: 1; display: flex; justify-content: center; align-items: center; background: #121214; }
-        button { cursor: pointer; padding: 8px; border-radius: 4px; border: none; background: #3d3d4f; color: white; }
-        button:hover { background: #4e4e66; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: #1e1e24; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+        
+        #sidebar { width: 300px; background: #2b2b36; padding: 15px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #444; }
+        .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        button { background: #3d3d4f; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #ffb703; color: #000; }
+        
+        #layersContainer { flex-grow: 1; overflow-y: auto; margin-top: 10px; }
+        .layer-item { background: #3d3d4f; padding: 8px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .layer-item.active { border: 2px solid #ffb703; }
+        
+        #canvas-viewport { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #121214; }
+        canvas { background: white; cursor: crosshair; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
     <h2>Nanas Engine</h2>
-    <button onclick="requestNewLayerCreation()">➕ Add Layer</button>
+    <div class="tool-grid">
+        <button onclick="currentTool='brush'">🖌️ Brush</button>
+        <button onclick="currentTool='eraser'">🧽 Eraser</button>
+        <button onclick="saveProject()">💾 Save .nns</button>
+        <button onclick="document.getElementById('importFile').click()">📂 Load .nns</button>
+        <input type="file" id="importFile" style="display:none" onchange="loadProject(event)">
+    </div>
+    <button onclick="requestNewLayerCreation()" style="background:#ffb703; color:black; font-weight:bold;">➕ New Layer</button>
     <div id="layersContainer"></div>
-    <hr style="width:100%">
-    <button onclick="saveProject()">💾 Export (.nns)</button>
-    <input type="file" id="importFile" accept=".nns" style="display:none" onchange="loadProject(event)">
-    <button onclick="document.getElementById('importFile').click()">📂 Load (.nns)</button>
 </div>
 
 <div id="canvas-viewport">
@@ -37,56 +44,72 @@
     const ctx = canvas.getContext('2d');
     let layers = [];
     let activeLayer = null;
-    let history = []; // NNS Data Stream
+    let currentTool = 'brush';
+    let isDrawing = false;
 
+    // --- DRAWING LOGIC ---
+    canvas.addEventListener('mousedown', e => { isDrawing = true; draw(e); });
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+
+    function draw(e) {
+        if (!isDrawing || !activeLayer) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        activeLayer.ctx.lineCap = 'round';
+        activeLayer.ctx.lineWidth = 5;
+        activeLayer.ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : '#000000';
+        activeLayer.ctx.lineTo(x, y);
+        activeLayer.ctx.stroke();
+        activeLayer.ctx.beginPath();
+        activeLayer.ctx.moveTo(x, y);
+        render();
+    }
+
+    // --- LAYER MANAGEMENT ---
     function createLayer(name) {
         const c = document.createElement('canvas');
         c.width = canvas.width; c.height = canvas.height;
-        const layer = { id: Date.now().toString(), name, canvas: c, ctx: c.getContext('2d'), visible: true };
+        const layer = { id: Date.now(), name, canvas: c, ctx: c.getContext('2d'), visible: true };
         layers.push(layer);
         activeLayer = layer;
-        renderLayerList();
-        draw();
+        updateUI();
+        render();
     }
 
     function requestNewLayerCreation() {
-        const name = prompt("Enter Layer Name:", "Layer " + (layers.length + 1));
+        const name = prompt("Layer Name:", "Layer " + (layers.length + 1));
         if (name) createLayer(name);
     }
 
-    function renameLayer(id) {
-        const layer = layers.find(l => l.id === id);
-        const newName = prompt("Rename layer:", layer.name);
-        if (newName) {
-            layer.name = newName;
-            renderLayerList();
-        }
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        layers.forEach(l => { if (l.visible) ctx.drawImage(l.canvas, 0, 0); });
     }
 
-    function renderLayerList() {
+    function updateUI() {
         const container = document.getElementById('layersContainer');
         container.innerHTML = '';
         [...layers].reverse().forEach(l => {
             const div = document.createElement('div');
             div.className = `layer-item ${activeLayer.id === l.id ? 'active' : ''}`;
-            div.innerHTML = `<span onclick="activeLayer=layers.find(x=>x.id==='${l.id}'); renderLayerList()">${l.name}</span>
-                             <button onclick="renameLayer('${l.id}')">✏️</button>`;
+            div.innerHTML = `<span onclick="activeLayer=layers.find(x=>x.id===${l.id}); updateUI()">${l.name}</span>
+                             <button onclick="renameLayer(${l.id})">✏️</button>`;
             container.appendChild(div);
         });
     }
 
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        layers.forEach(l => { if (l.visible) ctx.drawImage(l.canvas, 0, 0); });
+    function renameLayer(id) {
+        const layer = layers.find(l => l.id === id);
+        const name = prompt("Rename:", layer.name);
+        if (name) { layer.name = name; updateUI(); }
     }
 
-    // NNS Export Protocol
+    // --- NNS PROTOCOL ---
     function saveProject() {
-        const data = {
-            version: "3.0",
-            layers: layers.map(l => ({ name: l.name, data: l.canvas.toDataURL() })),
-            history: history
-        };
+        const data = { signature: "NANAS_V3", layers: layers.map(l => ({ name: l.name, data: l.canvas.toDataURL() })) };
         const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -94,26 +117,24 @@
         a.click();
     }
 
-    // NNS Import Protocol
-    function loadProject(e) {
+    async function loadProject(e) {
+        const file = e.target.files[0];
         const reader = new FileReader();
-        reader.onload = function(event) {
-            const json = JSON.parse(event.target.result);
+        reader.onload = async (ev) => {
+            const json = JSON.parse(ev.target.result);
             layers = [];
-            json.layers.forEach(l => {
+            for (const l of json.layers) {
                 const img = new Image();
-                img.onload = () => {
-                    createLayer(l.name);
-                    activeLayer.ctx.drawImage(img, 0, 0);
-                    draw();
-                };
                 img.src = l.data;
-            });
+                await img.decode();
+                createLayer(l.name);
+                activeLayer.ctx.drawImage(img, 0, 0);
+            }
+            render();
         };
-        reader.readAsText(e.target.files[0]);
+        reader.readAsText(file);
     }
 
-    // Init
     createLayer("Background");
 </script>
 </body>
