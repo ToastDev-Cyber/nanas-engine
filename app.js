@@ -6,6 +6,9 @@ const brushSize = document.getElementById('brushSize');
 const sizeVal = document.getElementById('sizeVal');
 const clearBtn = document.getElementById('clearBtn');
 const exportBtn = document.getElementById('exportBtn');
+const exportFormat = document.getElementById('exportFormat');
+const importBtn = document.getElementById('importBtn');
+const imageImporter = document.getElementById('imageImporter');
 
 // Tool controls
 const brushTool = document.getElementById('brushTool');
@@ -51,7 +54,6 @@ function loadRepositoryFonts() {
 }
 loadRepositoryFonts();
 
-// Smart canvas initial setup & scale preservation
 function clearToWhite() {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -67,7 +69,6 @@ function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Default white background base so image exports are never transparent grid blanks
     clearToWhite();
     ctx.drawImage(tempCanvas, 0, 0);
     
@@ -331,20 +332,61 @@ clearBtn.addEventListener('click', () => {
     clearToWhite();
 });
 
-// 💾 EXPORT FILE EMITTER
+// ==========================================
+// 📂 BITMAP IMPORT SYSTEM
+// ==========================================
+importBtn.addEventListener('click', () => {
+    // Forward click action directly to the native hidden file link node
+    imageImporter.click();
+});
+
+imageImporter.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+            if (activeTextArea) finalizeText();
+            
+            // Draw imported picture centered dynamically onto workspace canvas coordinates
+            const xOffset = (canvas.width - img.width) / 2;
+            const yOffset = (canvas.height - img.height) / 2;
+            
+            ctx.drawImage(img, xOffset, yOffset);
+            
+            // Clean loader strings out of value log so same file can be re-imported later
+            imageImporter.value = '';
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+// ==========================================
+// 💾 MULTI-FORMAT BITMAP EXPORT SYSTEM
+// ==========================================
 exportBtn.addEventListener('click', () => {
-    // If user is currently typing text, stamp it down before export captures the frame
     if (activeTextArea) finalizeText();
 
-    // 1. Convert canvas rendering context matrix data into raw image uri format
-    const imageURI = canvas.toDataURL('image/png');
+    // 1. Determine target format from the UI select field dropdown element
+    const mimeType = exportFormat.value; // Outputs: 'image/png', 'image/jpeg', or 'image/webp'
+    
+    // 2. Generate correct custom matching file extensions
+    let extension = '.png';
+    if (mimeType === 'image/jpeg') extension = '.jpg';
+    if (mimeType === 'image/webp') extension = '.webp';
 
-    // 2. Synthesize virtual link node anchor injection element
+    // 3. Compile canvas rendering frame matrix data at top quality (1.0)
+    const imageURI = canvas.toDataURL(mimeType, 1.0);
+
+    // 4. Synthesize virtual link node anchor injection element
     const virtualLink = document.createElement('a');
-    virtualLink.download = 'nanas-artwork.png'; // File name setup target designation
+    virtualLink.download = `nanas-artwork${extension}`; 
     virtualLink.href = imageURI;
 
-    // 3. Command browser execution loop trigger click sequence safely
+    // 5. Command browser execution loop trigger click sequence safely
     document.body.appendChild(virtualLink);
     virtualLink.click();
     document.body.removeChild(virtualLink);
