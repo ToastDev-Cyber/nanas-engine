@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🍍 NANAS ENGINE - CORE APPLICATION ARCHITECTURE
+   🍍 NANAS ENGINE - CORE APPLICATION ARCHITECTURE (ALL TOOLS INTEGRATED)
    ========================================================================== */
 
 // 🌐 Core Workspace Nodes
@@ -17,16 +17,19 @@ const imageImporter = document.getElementById('imageImporter');
 
 // 🛠️ Tool Selection Nodes
 const brushTool = document.getElementById('brushTool');
+const eraserTool = document.getElementById('eraserTool');
+const eyedropperTool = document.getElementById('eyedropperTool');
 const bucketTool = document.getElementById('bucketTool');
+const lineTool = document.getElementById('lineTool');
 const squareTool = document.getElementById('squareTool');
 const circleTool = document.getElementById('circleTool');
 const textTool = document.getElementById('textTool');
 const fontSelect = document.getElementById('fontSelect');
 const fontSelectorGroup = document.getElementById('fontSelectorGroup');
 
-// 🔄 Engine Engine States
+// 🔄 Engine States
 let isDrawing = false;
-let currentTool = 'brush'; // Setup options: 'brush', 'bucket', 'square', 'circle', 'text'
+let currentTool = 'brush'; // Options: 'brush', 'eraser', 'eyedropper', 'bucket', 'line', 'square', 'circle', 'text'
 let startX, startY;        
 let snapshot;              
 let activeTextArea = null; 
@@ -129,7 +132,7 @@ function floodFill(startX, startY, fillColor) {
     const targetB = data[targetIdx + 2];
     const targetA = data[targetIdx + 3];
 
-    // Prevent endless recursion loops if fill targeting destination holds matching data structures
+    // Prevent endless loops if fill destination holds identical matching pixel structures
     if (
         targetR === fillColor.r &&
         targetG === fillColor.g &&
@@ -178,23 +181,36 @@ function startDrawing(e) {
     startX = coords.x;
     startY = coords.y;
 
+    // 🧪 Tool Mode: Eyedropper Sampler
+    if (currentTool === 'eyedropper') {
+        const fillColor = ctx.getImageData(startX, startY, 1, 1).data;
+        const r = fillColor[0].toString(16).padStart(2, '0');
+        const g = fillColor[1].toString(16).padStart(2, '0');
+        const b = fillColor[2].toString(16).padStart(2, '0');
+        colorPicker.value = `#${r}${g}${b}`;
+        return;
+    }
+
+    // 🔤 Tool Mode: Interactive Font Text overlay
     if (currentTool === 'text') {
         createTextbox(startX, startY);
         return;
     }
 
+    // 🪣 Tool Mode: Flood Fill Bucket
     if (currentTool === 'bucket') {
         const fillColor = hexToRgba(colorPicker.value);
         floodFill(startX, startY, fillColor);
         return;
     }
 
+    // 🖌️ Active Drawing Routine Configuration
     isDrawing = true;
-    ctx.strokeStyle = colorPicker.value;
+    ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : colorPicker.value;
     ctx.lineWidth = brushSize.value;
     snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    if (currentTool === 'brush') {
+    if (currentTool === 'brush' || currentTool === 'eraser') {
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(startX, startY);
@@ -203,24 +219,33 @@ function startDrawing(e) {
 }
 
 function stopDrawing() {
-    if (currentTool === 'text' || currentTool === 'bucket') return;
+    if (currentTool === 'text' || currentTool === 'bucket' || currentTool === 'eyedropper') return;
     isDrawing = false;
     ctx.beginPath();
 }
 
 function draw(e) {
-    if (!isDrawing || currentTool === 'text' || currentTool === 'bucket') return;
+    if (!isDrawing || currentTool === 'text' || currentTool === 'bucket' || currentTool === 'eyedropper') return;
 
     const coords = getCoordinates(e);
     const currentX = coords.x;
     const currentY = coords.y;
     const isAltPressed = e.altKey; // Modifier shortcut hook for symmetry constraints
 
-    if (currentTool === 'brush') {
+    ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : colorPicker.value;
+    ctx.lineWidth = brushSize.value;
+
+    if (currentTool === 'brush' || currentTool === 'eraser') {
         ctx.lineTo(currentX, currentY);
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(currentX, currentY);
+    } else if (currentTool === 'line') {
+        ctx.putImageData(snapshot, 0, 0);
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(currentX, currentY);
+        ctx.stroke();
     } else if (currentTool === 'square') {
         ctx.putImageData(snapshot, 0, 0);
         ctx.beginPath();
@@ -334,7 +359,10 @@ function setActiveTool(tool, clickedButton) {
 }
 
 brushTool.addEventListener('click', () => setActiveTool('brush', brushTool));
+eraserTool.addEventListener('click', () => setActiveTool('eraser', eraserTool));
+eyedropperTool.addEventListener('click', () => setActiveTool('eyedropper', eyedropperTool));
 bucketTool.addEventListener('click', () => setActiveTool('bucket', bucketTool));
+lineTool.addEventListener('click', () => setActiveTool('line', lineTool));
 squareTool.addEventListener('click', () => setActiveTool('square', squareTool));
 circleTool.addEventListener('click', () => setActiveTool('circle', circleTool));
 textTool.addEventListener('click', () => setActiveTool('text', textTool));
