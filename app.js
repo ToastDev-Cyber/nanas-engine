@@ -78,25 +78,25 @@ function draw(e) {
     const currentX = coords.x;
     const currentY = coords.y;
 
-    // Restore the canvas snapshot to wipe out the previous preview frame
-    ctx.putImageData(snapshot, 0, 0);
-
     // Track if the Alt key is being held down during the event
     const isAltPressed = e.altKey;
 
     if (currentTool === 'brush') {
+        // Brush draws continuously without wiping the canvas with snapshots
         ctx.lineTo(currentX, currentY);
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(currentX, currentY);
     } else if (currentTool === 'square') {
+        // Only restore the preview snapshot for structural shapes
+        ctx.putImageData(snapshot, 0, 0);
         ctx.beginPath();
+        
         let width = currentX - startX;
         let height = currentY - startY;
 
         // If ALT is held, match the width and height to force a perfect geometric square
         if (isAltPressed) {
-            // Determine the largest absolute drag distance to set uniform size
             const sideLength = Math.max(Math.abs(width), Math.abs(height));
             width = width < 0 ? -sideLength : sideLength;
             height = height < 0 ? -sideLength : sideLength;
@@ -104,18 +104,18 @@ function draw(e) {
 
         ctx.strokeRect(startX, startY, width, height);
     } else if (currentTool === 'circle') {
+        // Only restore the preview snapshot for structural shapes
+        ctx.putImageData(snapshot, 0, 0);
         ctx.beginPath();
         
         if (isAltPressed) {
-            // PERFECT CIRCLE: Standard radius calculations from the origin point
+            // PERFECT CIRCLE
             const radius = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
             ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
         } else {
-            // STRETCHED ELLIPSE: Distorts x-radius and y-radius freely based on mouse position
+            // STRETCHED ELLIPSE
             const radiusX = Math.abs(currentX - startX);
             const radiusY = Math.abs(currentY - startY);
-            
-            // canvas context path configuration for squashed/stretched ovals
             ctx.ellipse(startX, startY, radiusX, radiusY, 0, 0, 2 * Math.PI);
         }
         
