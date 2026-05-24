@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nanas Engine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="toolbar">
+        <!-- Logo Element for Nanas Engine -->
+        <div class="logo">🍍 Nanas Engine</div>
+        
+        <div class="control-group">
+            <label for="colorPicker">Color:</label>
+            <input type="color" id="colorPicker" value="#4f46e5">
+        </div>
+        
+        <div class="control-group">
+            <label for="brushSize">Size:</label>
+            <input type="range" id="brushSize" min="1" max="50" value="5">
+            <span id="sizeVal">5px</span>
+        </div>
+
+        <button id="clearBtn">Clear Canvas</button>
+    </div>
+
+    <canvas id="paintCanvas"></canvas>
+
+    <script src="app.js"></script>
+</body>
+</html>
