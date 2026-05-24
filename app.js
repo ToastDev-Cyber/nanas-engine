@@ -1,3 +1,8 @@
+/* ==========================================================================
+   🍍 NANAS ENGINE - CORE APPLICATION ARCHITECTURE
+   ========================================================================== */
+
+// 🌐 Core Workspace Nodes
 const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -10,7 +15,7 @@ const exportFormat = document.getElementById('exportFormat');
 const importBtn = document.getElementById('importBtn');
 const imageImporter = document.getElementById('imageImporter');
 
-// Tool controls
+// 🛠️ Tool Selection Nodes
 const brushTool = document.getElementById('brushTool');
 const bucketTool = document.getElementById('bucketTool');
 const squareTool = document.getElementById('squareTool');
@@ -19,13 +24,16 @@ const textTool = document.getElementById('textTool');
 const fontSelect = document.getElementById('fontSelect');
 const fontSelectorGroup = document.getElementById('fontSelectorGroup');
 
+// 🔄 Engine Engine States
 let isDrawing = false;
-let currentTool = 'brush'; // Options: 'brush', 'bucket', 'square', 'circle', 'text'
+let currentTool = 'brush'; // Setup options: 'brush', 'bucket', 'square', 'circle', 'text'
 let startX, startY;        
 let snapshot;              
 let activeTextArea = null; 
 
-// Custom Repository Fonts
+// ==========================================================================
+// 🔤 TYPOGRAPHY RUNTIME MANAGEMENT SYSTEM
+// ==========================================================================
 const REPO_FONTS = {
     "edosz.ttf": "Edo SZ"
 };
@@ -36,49 +44,61 @@ function loadRepositoryFonts() {
     Object.entries(REPO_FONTS).forEach(([fontFile, displayName]) => {
         const fontID = fontFile.split('.')[0]; 
         
+        // Use browser runtime api to hook file asset paths dynamically
         const customFont = new FontFace(fontID, `url(${fontFile})`);
         customFont.load().then((loadedFont) => {
             document.fonts.add(loadedFont);
             loadedFontsMap.set(fontID, true);
             
+            // Inject structural drop-down option into index DOM hook
             const option = document.createElement('option');
             option.value = fontID;
             option.textContent = displayName;
             fontSelect.appendChild(option);
             
-            console.log(`🍍 Nanas Engine: Loaded [${fontFile}] successfully.`);
+            console.log(`🍍 Nanas Engine: Loaded layout file [${fontFile}] successfully.`);
         }).catch((err) => {
-            console.log(`⚠️ Nanas Engine: Missing [${fontFile}]. Skipping.`);
+            console.log(`⚠️ Nanas Engine: Dynamic file target missing [${fontFile}]. Skipping injection loop.`);
         });
     });
 }
 loadRepositoryFonts();
 
+// ==========================================================================
+// 🗺️ VIEWPORT BOUNDS HANDLING ENGINE
+// ==========================================================================
 function clearToWhite() {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function resizeCanvas() {
+    // Preserve old rendering frame matrix data state before adjusting aspect layout links
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
     const tempCtx = tempCanvas.getContext('2d');
     tempCtx.drawImage(canvas, 0, 0);
 
+    // Refresh canvas node sizing metrics based on modern browser viewport states
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    // Stamp baseline layer flat white so pixel data transfers never export transparent checkered boxes
     clearToWhite();
     ctx.drawImage(tempCanvas, 0, 0);
     
+    // Core drawing smooth physics configurations
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 }
 
 window.addEventListener('resize', resizeCanvas);
-setTimeout(resizeCanvas, 1);
+setTimeout(resizeCanvas, 1); // Trigger instant scale adjustment loop context at runtime load
 
+// ==========================================================================
+// 🎯 DATA PARSER MATH COMPILER METHODS
+// ==========================================================================
 function getCoordinates(e) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -96,7 +116,7 @@ function hexToRgba(hex) {
     return { r, g, b, a: 255 };
 }
 
-// Flood Fill Engine
+// 🪣 High-Performance Non-Recursive Stack-Based Flood Fill
 function floodFill(startX, startY, fillColor) {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
@@ -109,6 +129,7 @@ function floodFill(startX, startY, fillColor) {
     const targetB = data[targetIdx + 2];
     const targetA = data[targetIdx + 3];
 
+    // Prevent endless recursion loops if fill targeting destination holds matching data structures
     if (
         targetR === fillColor.r &&
         targetG === fillColor.g &&
@@ -144,6 +165,9 @@ function floodFill(startX, startY, fillColor) {
     ctx.putImageData(imageData, 0, 0);
 }
 
+// ==========================================================================
+// 🖌️ CORE DRAWING INPUT EXECUTION PIPELINE
+// ==========================================================================
 function startDrawing(e) {
     if (activeTextArea) {
         finalizeText();
@@ -190,7 +214,7 @@ function draw(e) {
     const coords = getCoordinates(e);
     const currentX = coords.x;
     const currentY = coords.y;
-    const isAltPressed = e.altKey;
+    const isAltPressed = e.altKey; // Modifier shortcut hook for symmetry constraints
 
     if (currentTool === 'brush') {
         ctx.lineTo(currentX, currentY);
@@ -224,6 +248,9 @@ function draw(e) {
     }
 }
 
+// ==========================================================================
+// 🔤 OVERLAY TEXT ENGINE SUBSYSTEM
+// ==========================================================================
 function createTextbox(x, y) {
     const container = document.getElementById('canvasContainer');
     const textarea = document.createElement('textarea');
@@ -240,6 +267,7 @@ function createTextbox(x, y) {
     textarea.style.width = '200px';
     textarea.style.height = `${parseInt(brushSize.value) + 10}px`;
 
+    // Handle auto-expansion parameters dynamically during structural text typing frames
     textarea.addEventListener('input', () => {
         textarea.style.width = 'auto';
         textarea.style.width = `${textarea.scrollWidth + 20}px`;
@@ -272,7 +300,7 @@ function finalizeText() {
         let currentY = y;
         lines.forEach(line => {
             ctx.fillText(line, x, currentY);
-            currentY += parseInt(brushSize.value, 10) * 1.05;
+            currentY += parseInt(brushSize.value, 10) * 1.05; // Line-height spacing buffer constant
         });
     }
 
@@ -281,20 +309,18 @@ function finalizeText() {
 }
 
 function updateFontSelectorVisibility() {
-    if (currentTool === 'text') {
-        fontSelectorGroup.style.display = 'flex';
-    } else {
-        fontSelectorGroup.style.display = 'none';
-    }
+    fontSelectorGroup.style.display = (currentTool === 'text') ? 'flex' : 'none';
 }
 
-// Action Event Listeners
+// ==========================================
+// 📡 ROUTING INPUT EVENT LISTENERS
+// ==========================================
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseleave', stopDrawing);
 
-// Touch Support
+// Full Mobile/Touch Interaction Interfaces
 canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, { passive: false });
 canvas.addEventListener('touchend', stopDrawing);
 canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
@@ -333,10 +359,11 @@ clearBtn.addEventListener('click', () => {
 });
 
 // ==========================================
-// 📂 BITMAP IMPORT SYSTEM
+// 📂 FILE MANAGEMENT INTEGRATION CORE
 // ==========================================
+
+// 📂 Bitmap Input Loading Stream
 importBtn.addEventListener('click', () => {
-    // Forward click action directly to the native hidden file link node
     imageImporter.click();
 });
 
@@ -350,43 +377,38 @@ imageImporter.addEventListener('change', (e) => {
         img.onload = () => {
             if (activeTextArea) finalizeText();
             
-            // Draw imported picture centered dynamically onto workspace canvas coordinates
+            // Calculate dynamic offsets to center incoming images perfectly onto canvas coordinates
             const xOffset = (canvas.width - img.width) / 2;
             const yOffset = (canvas.height - img.height) / 2;
             
             ctx.drawImage(img, xOffset, yOffset);
-            
-            // Clean loader strings out of value log so same file can be re-imported later
-            imageImporter.value = '';
+            imageImporter.value = ''; // Reset input log target buffer link
         };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
 });
 
-// ==========================================
-// 💾 MULTI-FORMAT BITMAP EXPORT SYSTEM
-// ==========================================
+// 💾 Multi-Format Core Bitmap Exporter
 exportBtn.addEventListener('click', () => {
     if (activeTextArea) finalizeText();
 
-    // 1. Determine target format from the UI select field dropdown element
-    const mimeType = exportFormat.value; // Outputs: 'image/png', 'image/jpeg', or 'image/webp'
+    // 1. Identify current target mime type selection
+    const mimeType = exportFormat.value; 
     
-    // 2. Generate correct custom matching file extensions
+    // 2. Map file structure types out to string attachments
     let extension = '.png';
     if (mimeType === 'image/jpeg') extension = '.jpg';
     if (mimeType === 'image/webp') extension = '.webp';
 
-    // 3. Compile canvas rendering frame matrix data at top quality (1.0)
+    // 3. Convert rendering matrix coordinates down to raw target context string links
     const imageURI = canvas.toDataURL(mimeType, 1.0);
 
-    // 4. Synthesize virtual link node anchor injection element
+    // 4. Fire clean virtual link node execution sequences down onto the local machine system
     const virtualLink = document.createElement('a');
     virtualLink.download = `nanas-artwork${extension}`; 
     virtualLink.href = imageURI;
 
-    // 5. Command browser execution loop trigger click sequence safely
     document.body.appendChild(virtualLink);
     virtualLink.click();
     document.body.removeChild(virtualLink);
