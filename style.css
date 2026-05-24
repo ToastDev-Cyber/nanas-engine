@@ -1,64 +1,82 @@
+/* ==========================================================================
+   🎨 NANAS ENGINE - CORE CORE STYLING
+   ========================================================================== */
+
+/* 🌌 Reset & Global Layout Defaults */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    user-select: none;
+    user-select: none; /* Prevents text highlights while drawing */
 }
 
 body {
-    background-color: #1a1a1a;
+    background-color: #121212;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     height: 100vh;
+    width: 100vw;
     overflow: hidden;
 }
 
-/* 🗺️ Workspace Layout */
+/* ==========================================================================
+   🗺️ WORKSPACE & CANVAS LAYOUT
+   ========================================================================== */
+
 #canvasContainer {
-    position: relative; /* CRITICAL: Holds typed text boxes onto their exact coordinates */
+    position: relative; /* CRITICAL: Serves as coordinate origin for typed text boxes */
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 canvas {
     background-color: #ffffff;
     display: block;
     cursor: crosshair;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
 }
 
-/* 🎛️ Floating Toolbar System */
+/* ==========================================================================
+   🎛️ FLOATING COMMAND CONTROL BAR (TOOLBAR)
+   ========================================================================== */
+
 #toolbar {
     position: absolute;
-    top: 15px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(35, 35, 35, 0.9);
-    border: 1px solid #444;
+    background-color: rgba(26, 26, 26, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    padding: 10px 20px;
+    padding: 10px 18px;
     display: flex;
     align-items: center;
-    gap: 15px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
+    gap: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(12px);
     z-index: 100;
     max-width: 95vw;
 }
 
-/* 🍍 Small Logo Rules */
+/* 🍍 Small Engine Brand Logo Identity */
 #logoContainer {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-right: 5px;
+    padding-right: 4px;
 }
 
 #engineLogo {
     height: 24px;
     width: auto;
     object-fit: contain;
+    will-change: transform;
 }
 
+/* 🔗 Modular Toolbar Groupings */
 .tool-section {
     display: flex;
     align-items: center;
@@ -66,133 +84,168 @@ canvas {
 }
 
 .separator {
-    border-left: 1px solid #444;
-    padding-left: 15px;
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    padding-left: 16px;
 }
 
 .right-align {
     margin-left: auto;
 }
 
-/* 📂 Formats Input Interface Combination Unit Layout */
-.format-group {
-    display: flex;
-    align-items: center;
-    background-color: #2a2a2a;
-    border: 1px solid #555;
-    border-radius: 6px;
-    overflow: hidden;
-    padding-left: 5px;
-}
+/* ==========================================================================
+   🕹️ INTERACTIVE INTERFACE UI ELEMENTS (BUTTONS & INPUTS)
+   ========================================================================== */
 
-#exportFormat {
-    background-color: transparent;
-    border: none;
-    color: #fff;
-    font-size: 13px;
-    outline: none;
-    cursor: pointer;
-    padding: 4px 5px;
-}
-
-#exportFormat option {
-    background-color: #222;
-    color: #fff;
-}
-
-/* 🕹️ Buttons and Sliders */
 .tool-btn, .action-btn {
-    background-color: #2a2a2a;
-    border: 1px solid #555;
+    background-color: #242424;
+    border: 1px solid #444;
     border-radius: 6px;
-    color: #fff;
+    color: #e0e0e0;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
     padding: 8px 14px;
-    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
 }
 
 .tool-btn:hover, .action-btn:hover {
-    background-color: #383838;
-    border-color: #777;
+    background-color: #323232;
+    border-color: #666;
+    color: #fff;
 }
 
+.tool-btn:active, .action-btn:active {
+    transform: scale(0.97);
+}
+
+/* ⭐ Active Tool Highlight States */
 .tool-btn.active {
     background-color: #ffe600;
     border-color: #ffe600;
     color: #111;
     font-weight: 600;
+    box-shadow: 0 0 12px rgba(255, 230, 0, 0.3);
 }
 
-/* 🔵 Blue Import Accent */
+/* 🔵 Blue Import Action Style Modifier */
 .action-btn.import-style {
     background-color: #1b537e;
     border-color: #2572ad;
 }
 
 .action-btn.import-style:hover {
-    background-color: #2572ad;
+    background-color: #2369a1;
+    border-color: #2c85ca;
 }
 
-/* 🟢 Green Export Accent Modification */
-.format-group .action-btn.export-style {
-    border: none;
-    border-radius: 0;
-    background-color: #1e6b36;
-}
-
-.format-group .action-btn.export-style:hover {
-    background-color: #2b9e4f;
-}
-
-/* 🔴 Red Clear Accent */
+/* 🔴 Red Reset Action Style Modifier */
 .action-btn.clear-style {
     background-color: #8c2020;
     border-color: #b33636;
 }
 
 .action-btn.clear-style:hover {
-    background-color: #b33636;
+    background-color: #a42626;
+    border-color: #cc3f3f;
 }
+
+/* ==========================================================================
+   📂 BITMAP EXPORT SPLIT OPTION DROP-DOWN SELECTOR UI
+   ========================================================================== */
+
+.format-group {
+    display: flex;
+    align-items: center;
+    background-color: #242424;
+    border: 1px solid #444;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+#exportFormat {
+    background-color: transparent;
+    border: none;
+    color: #e0e0e0;
+    font-size: 13px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    padding: 0 8px;
+    height: 100%;
+}
+
+#exportFormat option {
+    background-color: #1a1a1a;
+    color: #fff;
+}
+
+/* 🟢 Green Export Action Button Attached inside Split Selector Dropdown */
+.format-group .action-btn.export-style {
+    border: none;
+    border-radius: 0;
+    border-left: 1px solid #444;
+    background-color: #1e6b36;
+}
+
+.format-group .action-btn.export-style:hover {
+    background-color: #278544;
+}
+
+/* ==========================================================================
+   🎨 TOOL ATTRIBUTE MODIFIERS (COLOR PICKER & RANGE SLIDER)
+   ========================================================================== */
 
 #colorPicker {
     background: none;
     border: none;
     cursor: pointer;
     height: 36px;
-    width: 40px;
+    width: 38px;
+    padding: 0;
 }
+
+/* Custom styling for native browser color picker circles if supported */
+#colorPicker::-webkit-color-swatch-wrapper { padding: 0; }
+#colorPicker::-webkit-color-swatch { border: 1px solid #555; border-radius: 6px; }
 
 .slider-group {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     color: #aaa;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 #brushSize {
     cursor: pointer;
-    accent-color: #ffe600;
+    accent-color: #ffe600; /* Custom theme color for matching track slider */
+    height: 6px;
+    border-radius: 3px;
 }
 
 #fontSelectorGroup {
-    color: #fff;
+    color: #e0e0e0;
     font-size: 14px;
 }
 
 #fontSelect {
-    background-color: #2a2a2a;
-    border: 1px solid #555;
+    background-color: #242424;
+    border: 1px solid #444;
     border-radius: 6px;
     color: #fff;
     padding: 6px 10px;
     outline: none;
     cursor: pointer;
+    font-size: 13px;
 }
 
-/* 🔤 Dynamic Input Textbox Overlay */
+/* ==========================================================================
+   🔤 CANVAS INJECTED DYNAMIC LAYER OVERLAY TEXTBOX
+   ========================================================================== */
+
 .canvas-textarea {
     position: absolute;
     background: transparent;
@@ -205,4 +258,5 @@ canvas {
     margin: 0;
     line-height: 1;
     z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
