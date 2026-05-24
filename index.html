@@ -3,39 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanas Engine</title>
+    <title>Nanas Engine - Paint App</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="toolbar">
-        <div class="logo">🍍 Nanas Engine</div>
-        
-        <!-- Shape and Text Engine Core Tools -->
-        <div class="control-group">
-            <button class="tool-btn active" id="brushTool">🖌️ Brush</button>
-            <button class="tool-btn" id="squareTool">⬛ Square</button>
-            <button class="tool-btn" id="circleTool">⭕ Circle</button>
-            <button class="tool-btn" id="textTool">🔤 Text</button>
-        </div>
-
-        <div class="control-group">
-            <label for="colorPicker">Color:</label>
-            <input type="color" id="colorPicker" value="#4f46e5">
-        </div>
-        
-        <div class="control-group">
-            <label for="brushSize">Size:</label>
-            <input type="range" id="brushSize" min="8" max="72" value="24">
-            <span id="sizeVal">24px</span>
-        </div>
-
-        <button id="clearBtn" class="danger-btn">Clear Canvas</button>
-    </div>
-
-    <!-- The container holding both the rendering canvas and live editing fields -->
+    <!-- Main Workspace Container -->
     <div id="canvasContainer">
         <canvas id="paintCanvas"></canvas>
+    </div>
+
+    <!-- Top Floating Toolbar Wrapper -->
+    <div id="toolbar">
+        <div class="tool-section">
+            <button id="brushTool" class="tool-btn active">🖌️ Brush</button>
+            <button id="squareTool" class="tool-btn">⬜ Square</button>
+            <button id="circleTool" class="tool-btn">⭕ Circle</button>
+            <button id="textTool" class="tool-btn">🔤 Text</button>
+        </div>
+
+        <div class="tool-section separator">
+            <input type="color" id="colorPicker" value="#000000" title="Select Paint Color">
+            <div class="slider-group">
+                <input type="range" id="brushSize" min="5" max="100" value="20">
+                <span id="sizeVal">20px</span>
+            </div>
+        </div>
+
+        <!-- Font Selector Panel (Only reveals when Text tool is active) -->
+        <div id="fontSelectorGroup" class="tool-section" style="display: none;">
+            <label for="fontSelect">Font:</label>
+            <select id="fontSelect">
+                <option value="sans-serif">System Sans-Serif</option>
+                <!-- Edo SZ is injected right here automatically by app.js -->
+            </select>
+        </div>
+
+        <div class="tool-section right-align">
+            <button id="clearBtn" class="action-btn">🗑️ Clear Canvas</button>
+        </div>
     </div>
 
     <script src="app.js"></script>
