@@ -1,234 +1,41 @@
-/* ==========================================================================
-   🌌 THEME DESIGN SYSTEM VARIABLES
-   ========================================================================== */
-:root {
-  --bg-main: #0a0a0f;
-  --panel-bg: rgba(20, 20, 30, 0.7);
-  --panel-border: rgba(255, 255, 255, 0.08);
-  --accent-neon: #ff0055;
-  --accent-glow: rgba(255, 0, 85, 0.4);
-  --text-main: #f0f0f5;
-  --text-muted: #8a8a98;
-  --radius-main: 16px;
-  --radius-btn: 8px;
-  --blur-strength: 20px;
-  --transition-speed: 0.2s;
+/* 🍍 Nanas Engine Sidebar Styling */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #1e1e24; /* Dark sleek background */
+    color: #ffffff;
+    padding: 20px;
+    box-sizing: border-box;
+    
+    /* Enables scrolling when UI elements stack up too high */
+    overflow-y: auto; 
+    overflow-x: hidden;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Custom Scrollbar Styles for modern browsers (Chrome, Edge, Safari) */
+.sidebar::-webkit-scrollbar {
+    width: 8px; /* Width of the entire scrollbar */
 }
 
-body {
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
+.sidebar::-webkit-scrollbar-track {
+    background: #121214; /* Color of the tracking path */
+    border-radius: 4px;
 }
 
-/* 🖼️ CORE VIEWPORT CONTAINER */
-#canvasContainer {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
+.sidebar::-webkit-scrollbar-thumb {
+    background: #ffcc00; /* Yellow/Amber thumbnail tracking accents for Nanas theme */
+    border-radius: 4px;
+    border: 1px solid #121214;
 }
 
-#paintCanvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: block;
-  cursor: crosshair;
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #e6b800; /* Darker tone on hover states */
 }
 
-/* ==========================================================================
-   🎛️ CYBER-GLASSMOPHISM VERTICAL SIDEBAR
-   ========================================================================== */
-#toolbar {
-  position: fixed;
-  top: 50%;
-  left: 24px;
-  transform: translateY(-50%);
-  z-index: 1000;
-  
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius-main);
-  padding: 20px 14px;
-  
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 
-              inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(var(--blur-strength));
-  -webkit-backdrop-filter: blur(var(--blur-strength));
-  
-  width: 180px;
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-}
-
-/* Custom Scrollbar Mechanics for the Sidebar */
-#toolbar::-webkit-scrollbar {
-  width: 4px;
-}
-#toolbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-/* 🍍 Brand Header Style */
-#logoContainer {
-  width: 100%;
-  text-align: center;
-  font-weight: 800;
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: var(--text-main);
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-}
-
-/* Separator Partitions */
-.separator {
-  width: 100%;
-  border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.tool-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-/* ==========================================================================
-   🕹️ CONTROLS & INTERACTIVE COMPONENT STATES
-   ========================================================================== */
-.tool-btn, .action-btn {
-  width: 100%;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-btn);
-  color: var(--text-main);
-  font-size: 12px;
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all var(--transition-speed) ease;
-}
-
-.tool-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateX(2px);
-}
-
-/* Neon Active Selection Accent Toggle */
-.tool-btn.active {
-  background: var(--accent-neon);
-  border-color: var(--accent-neon);
-  box-shadow: 0 0 15px var(--accent-glow);
-  color: #fff;
-  font-weight: 600;
-}
-
-/* Action Execution Layout Blocks */
-.action-btn {
-  justify-content: center;
-  font-weight: 600;
-  text-align: center;
-}
-.action-btn:hover {
-  transform: scale(1.02);
-  filter: brightness(1.1);
-}
-
-/* ==========================================================================
-   ⚙️ CONTEXT SLIDERS & OPTIONS
-   ========================================================================== */
-.slider-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-}
-
-.slider-group label {
-  color: var(--text-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-/* Standardized Form Input Fields */
-input[type="color"], select, input[type="range"] {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-btn);
-  color: var(--text-main);
-  padding: 6px;
-  outline: none;
-  transition: border var(--transition-speed);
-}
-
-input[type="color"] {
-  height: 34px;
-  padding: 2px;
-  cursor: pointer;
-}
-
-select {
-  font-size: 11px;
-  cursor: pointer;
-}
-select option {
-  background: #14141e;
-  color: #fff;
-}
-
-/* Range Tracks */
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--text-main);
-  cursor: pointer;
-}
-
-/* ==========================================================================
-   🔤 TYPOGRAPHY RUNTIME OVERLAY BOX
-   ========================================================================== */
-.canvas-textarea {
-  position: absolute;
-  background: transparent;
-  border: 1px dashed var(--accent-neon);
-  outline: none;
-  resize: none;
-  overflow: hidden;
-  white-space: pre;
-  padding: 0;
-  margin: 0;
-  line-height: 1.05;
-  z-index: 999;
+/* Fallback support for Firefox */
+@supports (scrollbar-width: thin) {
+    .sidebar {
+        scrollbar-width: thin;
+        scrollbar-color: #ffcc00 #121214;
+    }
 }
