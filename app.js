@@ -8,6 +8,7 @@ const clearBtn = document.getElementById('clearBtn');
 
 // Tool controls
 const brushTool = document.getElementById('brushTool');
+const bucketTool = document.getElementById('bucketTool');
 const squareTool = document.getElementById('squareTool');
 const circleTool = document.getElementById('circleTool');
 const textTool = document.getElementById('textTool');
@@ -15,7 +16,7 @@ const fontSelect = document.getElementById('fontSelect');
 const fontSelectorGroup = document.getElementById('fontSelectorGroup');
 
 let isDrawing = false;
-let currentTool = 'brush'; // Setup options: 'brush', 'square', 'circle', 'text'
+let currentTool = 'brush'; // Setup options: 'brush', 'bucket', 'square', 'circle', 'text'
 let startX, startY;        
 let snapshot;              
 let activeTextArea = null; 
@@ -27,10 +28,8 @@ const REPO_FONTS = {
     "edosz.ttf": "Edo SZ"
 };
 
-// Internal map tracking loaded custom fonts
 const loadedFontsMap = new Map();
 
-// Pulls your custom ttf asset and registers it cleanly into your tool selector
 function loadRepositoryFonts() {
     Object.entries(REPO_FONTS).forEach(([fontFile, displayName]) => {
         const fontID = fontFile.split('.')[0]; 
@@ -40,7 +39,6 @@ function loadRepositoryFonts() {
             document.fonts.add(loadedFont);
             loadedFontsMap.set(fontID, true);
             
-            // Generate dropdown item option dynamically
             const option = document.createElement('option');
             option.value = fontID;
             option.textContent = displayName;
@@ -54,7 +52,6 @@ function loadRepositoryFonts() {
 }
 loadRepositoryFonts();
 
-// Smart workspace scaling handler
 function resizeCanvas() {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width;
@@ -73,19 +70,78 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 setTimeout(resizeCanvas, 1);
 
-// Utility coordinate normalizer
 function getCoordinates(e) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     const rect = canvas.getBoundingClientRect();
     return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
+        x: Math.floor(clientX - rect.left),
+        y: Math.floor(clientY - rect.top)
     };
 }
 
+// Helper to convert hex strings (#ffffff) to RGBA color objects
+function hexToRgba(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return { r, g, b, a: 255 };
+}
+
+// 🪣 FLOOD FILL ENGINE ALGORITHM
+function floodFill(startX, startY, fillColor) {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const width = imageData.width;
+    const height = imageData.height;
+
+    // Get color of target clicked pixel
+    const targetIdx = (startY * width + startX) * 4;
+    const targetR = data[targetIdx];
+    const targetG = data[targetIdx + 1];
+    const targetB = data[targetIdx + 2];
+    const targetA = data[targetIdx + 3];
+
+    // Avoid infinite loop if clicking on the exact same color
+    if (
+        targetR === fillColor.r &&
+        targetG === fillColor.g &&
+        targetB === fillColor.b &&
+        targetA === fillColor.a
+    ) {
+        return;
+    }
+
+    // Queue system processing coordinates
+    const queue = [[startX, startY]];
+
+    while (queue.length > 0) {
+        const [cx, cy] = queue.shift();
+        const idx = (cy * width + cx) * 4;
+
+        if (
+            data[idx] === targetR &&
+            data[idx + 1] === targetG &&
+            data[idx + 2] === targetB &&
+            data[idx + 3] === targetA
+        ) {
+            // Apply fill color
+            data[idx] = fillColor.r;
+            data[idx + 1] = fillColor.g;
+            data[idx + 2] = fillColor.b;
+            data[idx + 3] = fillColor.a;
+
+            // Check adjacent pixel sides
+            if (cx > 0) queue.push([cx - 1, cy]);
+            if (cx < width - 1) queue.push([cx + 1, cy]);
+            if (cy > 0) queue.push([cx, cy - 1]);
+            if (cy < height - 1) queue.push([cx, cy + 1]);
+        }
+    }
+    ctx.putImageData(imageData, 0, 0);
+}
+
 function startDrawing(e) {
-    // If user clicks down while actively typing elsewhere, process and stamp down the text first
     if (activeTextArea) {
         finalizeText();
         return;
@@ -97,6 +153,12 @@ function startDrawing(e) {
 
     if (currentTool === 'text') {
         createTextbox(startX, startY);
+        return;
+    }
+
+    if (currentTool === 'bucket') {
+        const fillColor = hexToRgba(colorPicker.value);
+        floodFill(startX, startY, fillColor);
         return;
     }
 
@@ -114,13 +176,13 @@ function startDrawing(e) {
 }
 
 function stopDrawing() {
-    if (currentTool === 'text') return;
+    if (currentTool === 'text' || currentTool === 'bucket') return;
     isDrawing = false;
     ctx.beginPath();
 }
 
 function draw(e) {
-    if (!isDrawing || currentTool === 'text') return;
+    if (!isDrawing || currentTool === 'text' || currentTool === 'bucket') return;
 
     const coords = getCoordinates(e);
     const currentX = coords.x;
@@ -169,14 +231,12 @@ function createTextbox(x, y) {
     textarea.style.color = colorPicker.value;
     textarea.style.fontSize = `${brushSize.value}px`;
     
-    // Preview the chosen font family instantly while typing
     const selectedFont = fontSelect.value;
     textarea.style.fontFamily = selectedFont === 'sans-serif' ? 'sans-serif' : `"${selectedFont}"`;
 
     textarea.style.width = '200px';
     textarea.style.height = `${parseInt(brushSize.value) + 10}px`;
 
-    // Dynamic scale helper as typing grows
     textarea.addEventListener('input', () => {
         textarea.style.width = 'auto';
         textarea.style.width = `${textarea.scrollWidth + 20}px`;
@@ -184,8 +244,6 @@ function createTextbox(x, y) {
     });
 
     container.appendChild(textarea);
-    
-    // Auto-focus text editor field box instantly
     setTimeout(() => { textarea.focus(); }, 50);
     activeTextArea = textarea;
 }
@@ -195,7 +253,6 @@ function finalizeText() {
 
     const text = activeTextArea.value;
     const x = parseInt(activeTextArea.style.left, 10);
-    // Align vertical typography drop safely relative to brush font size setup
     const y = parseInt(activeTextArea.style.top, 10) + parseInt(brushSize.value, 10) * 0.82;
 
     if (text.trim() !== "") {
@@ -212,7 +269,7 @@ function finalizeText() {
         let currentY = y;
         lines.forEach(line => {
             ctx.fillText(line, x, currentY);
-            currentY += parseInt(brushSize.value, 10) * 1.05; // Standard text line height spacing offset
+            currentY += parseInt(brushSize.value, 10) * 1.05;
         });
     }
 
@@ -228,13 +285,13 @@ function updateFontSelectorVisibility() {
     }
 }
 
-// Global UI Input Action Listeners
+// Input listeners
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseleave', stopDrawing);
 
-// Full Mobile Layout Touch Integrations
+// Touch Support
 canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, { passive: false });
 canvas.addEventListener('touchend', stopDrawing);
 canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
@@ -248,6 +305,7 @@ function setActiveTool(tool, clickedButton) {
 }
 
 brushTool.addEventListener('click', () => setActiveTool('brush', brushTool));
+bucketTool.addEventListener('click', () => setActiveTool('bucket', bucketTool));
 squareTool.addEventListener('click', () => setActiveTool('square', squareTool));
 circleTool.addEventListener('click', () => setActiveTool('circle', circleTool));
 textTool.addEventListener('click', () => setActiveTool('text', textTool));
