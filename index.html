@@ -3,333 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanas Engine</title>
+    <title>Nanas Engine v3.0 - Layer Matrix Edition</title>
     <style>
-        /* ==========================================================================
-           1. GLOBAL RESET & BASE SETTINGS
-           ========================================================================== */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none; /* Prevents text highlighting while dragging brushes */
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
         }
 
         body {
-            background-color: #121212;
-            color: #e0e0e0;
+            background-color: #1e1e24;
+            color: #f5f5f7;
             display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* Custom scrollbar behavior for the sidebar layout */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e1e1e;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #3a3a3a;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ffb703;
-        }
-
-        /* ==========================================================================
-           2. SIDEBAR NAVIGATION PANEL (DARK MODE)
-           ========================================================================== */
+        /* Sidebar Interface */
         #sidebar {
-            width: 290px;
-            background-color: #1e1e1e;
-            border-right: 1px solid #2d2d2d;
+            width: 280px;
+            background-color: #2b2b36;
+            border-right: 2px solid #3d3d4f;
             display: flex;
             flex-direction: column;
-            padding: 24px 18px;
-            gap: 18px;
+            padding: 15px;
+            gap: 15px;
             overflow-y: auto;
-            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
-            z-index: 10;
         }
 
-        h1 {
-            font-size: 1.4rem;
+        h2, h3 {
             color: #ffb703;
-            text-align: center;
-            margin-bottom: 8px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            font-size: 1.1rem;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #3d3d4f;
+            padding-bottom: 5px;
         }
 
-        .section-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: #777;
-            margin-top: 8px;
-            font-weight: bold;
-            border-bottom: 1px solid #2d2d2d;
-            padding-bottom: 4px;
+        .section-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        /* ==========================================================================
-           3. UI INPUTS, GRIDS & COMPONENTS
-           ========================================================================== */
         .tool-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
 
-        /* Shared styling across standard buttons and file upload facades */
-        button, .file-label {
-            background-color: #262626;
-            color: #dcdcdc;
-            border: 1px solid #383838;
-            padding: 10px 12px;
+        button, label.file-label {
+            background-color: #3d3d4f;
+            color: #f5f5f7;
+            border: none;
+            padding: 10px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.15s ease-in-out;
+            font-weight: 600;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
             text-align: center;
         }
 
-        button:hover, .file-label:hover {
-            background-color: #323232;
-            border-color: #ffb703;
+        button:hover, label.file-label:hover {
+            background-color: #4e4e66;
             color: #ffffff;
         }
 
-        /* Active Engine State Selection Highlight */
         button.active {
             background-color: #ffb703;
-            color: #121212;
-            font-weight: 600;
-            border-color: #ffb703;
-            box-shadow: 0 0 10px rgba(255, 183, 3, 0.2);
+            color: #1e1e24;
+            box-shadow: 0 0 10px rgba(2ff, 183, 3, 0.4);
         }
 
-        .control-group {
+        /* Controls styling */
+        .control-item {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-        }
-
-        .control-group label {
-            font-size: 0.8rem;
-            color: #b0b0b0;
-        }
-
-        /* Native Select Dropdowns & Sliders */
-        select, input[type="range"] {
-            width: 100%;
-            background-color: #262626;
-            color: #e0e0e0;
-            border: 1px solid #383838;
-            padding: 8px;
-            border-radius: 6px;
-            outline: none;
+            gap: 4px;
             font-size: 0.85rem;
+            color: #cbd5e1;
         }
 
-        select:focus {
-            border-color: #ffb703;
-        }
-
-        /* Color Picker Mask Styling */
-        input[type="color"] {
-            -webkit-appearance: none;
-            border: 1px solid #383838;
+        input[type="range"], select, input[type="color"] {
             width: 100%;
-            height: 38px;
-            border-radius: 6px;
+            padding: 6px;
+            background-color: #1e1e24;
+            border: 1px solid #3d3d4f;
+            border-radius: 4px;
+            color: #fff;
+            outline: none;
+        }
+
+        input[type="color"] {
+            height: 40px;
             cursor: pointer;
-            background: none;
-            padding: 0;
+            padding: 2px;
         }
 
-        input[type="color"]::-webkit-color-swatch-wrapper {
-            padding: 0;
-        }
-
-        input[type="color"]::-webkit-color-swatch {
-            border: none;
-            border-radius: 5px;
-        }
-
-        /* Hidden elements matching standard browser file pickers */
         input[type="file"] {
             display: none;
         }
 
-        /* Action Utilities Layout Context */
-        .action-btn {
-            width: 100%;
+        /* Layers Panel UI styling */
+        #layersContainer {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 5px;
         }
 
-        #clearBtn {
-            border-color: #5c1e29;
-            color: #ff4d6d;
+        .layer-item {
+            background-color: #3d3d4f !important;
+            border: 1px solid #4e4e66 !important;
+            border-radius: 6px;
+            color: #fff;
+            transition: border-color 0.2s ease;
         }
 
-        #clearBtn:hover {
-            background-color: #ff4d6d;
-            border-color: #ff4d6d;
-            color: #121212;
+        .layer-item.active {
+            background-color: #4e4e66 !important;
+            border: 1px solid #ffb703 !important;
         }
 
-        /* ==========================================================================
-           4. CANVAS MAIN WORKSPACE AREA
-           ========================================================================== */
-        #workspace {
-            flex-grow: 1;
+        .layer-name {
+            font-size: 0.85rem;
+            color: #f5f5f7;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 120px;
+        }
+
+        .layer-controls-right {
+            display: flex;
+            gap: 4px;
+        }
+
+        .layer-controls-right button {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            background-color: #1e1e24;
+        }
+
+        /* Canvas Viewport */
+        #canvas-viewport {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #161616;
+            background-color: #121214;
+            padding: 20px;
             position: relative;
-            padding: 24px;
         }
 
         canvas {
             background-color: #ffffff;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
             cursor: crosshair;
-            image-rendering: -webkit-optimize-contrast; /* Keeps structural line pixel art crisp */
+            image-rendering: pixelated;
         }
 
-        /* Help Text Indicator Frame */
-        #status-bar {
-            position: absolute;
-            bottom: 14px;
-            left: 24px;
-            font-size: 0.78rem;
-            color: #555555;
-            letter-spacing: 0.3px;
-            pointer-events: none;
+        /* System Action Blocks */
+        .system-ops {
+            margin-top: auto;
+            border-top: 2px solid #3d3d4f;
+            padding-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
+
+        .btn-danger { background-color: #ae2012; }
+        .btn-danger:hover { background-color: #ca2e22; }
+        .btn-success { background-color: #0096c7; }
+        .btn-success:hover { background-color: #00b4d8; }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR INTERFACE -->
+    <!-- SIDEBAR CONTROL MODULE -->
     <div id="sidebar">
-        <h1>Nanas Engine</h1>
+        <h2>Nanas Engine</h2>
         
-        <div class="section-title">Main Tools</div>
-        <div class="tool-grid">
-            <button id="tool-brush" class="active" onclick="setTool('brush')">Brush</button>
-            <button id="tool-pencil" onclick="setTool('pencil')">Pencil</button>
-            <button id="tool-eraser" onclick="setTool('eraser')">Eraser</button>
-            <button id="tool-eyedropper" onclick="setTool('eyedropper')">Eye Dropper</button>
-            <button id="tool-bucket" onclick="setTool('bucket')">Bucket Fill</button>
-            <button id="tool-text" onclick="setTool('text')">Text Tool</button>
+        <!-- TOOL BOX GRAPHICS GENERATOR -->
+        <div class="section-box">
+            <h3>Drawing Tools</h3>
+            <div class="tool-grid">
+                <button id="tool-brush" class="active" onclick="setTool('brush')">🖌️ Brush</button>
+                <button id="tool-pencil" onclick="setTool('pencil')">✏️ Pencil</button>
+                <button id="tool-eraser" onclick="setTool('eraser')">🧽 Eraser</button>
+                <button id="tool-bucket" onclick="setTool('bucket')">🪣 Bucket</button>
+                <button id="tool-eyedropper" onclick="setTool('eyedropper')">🧪 Dropper</button>
+                <button id="tool-text" onclick="setTool('text')">🔤 Text</button>
+            </div>
         </div>
 
-        <div class="section-title">Shapes</div>
-        <div class="tool-grid">
-            <button id="tool-square" onclick="setTool('square')">Square</button>
-            <button id="tool-circle" onclick="setTool('circle')">Circle</button>
-            <button id="tool-triangle" onclick="setTool('triangle')">Triangle</button>
+        <!-- VECTOR SHAPES PANEL -->
+        <div class="section-box">
+            <h3>Shapes Matrix</h3>
+            <div class="tool-grid">
+                <button id="tool-square" onclick="setTool('square')">⬛ Square</button>
+                <button id="tool-circle" onclick="setTool('circle')">⭕ Circle</button>
+                <button id="tool-triangle" onclick="setTool('triangle')">🔺 Triangle</button>
+            </div>
         </div>
 
-        <div class="section-title">Tool Properties</div>
-        <div class="control-group">
-            <label>Color</label>
-            <input type="color" id="colorPicker" value="#000000">
+        <!-- ENGINE BRUSH ATTRIBUTES -->
+        <div class="section-box">
+            <h3>Properties</h3>
+            <div class="control-item">
+                <label>Primary Color</label>
+                <input type="color" id="colorPicker" value="#1e1e24">
+            </div>
+            <div class="control-item">
+                <label>Size Vector</label>
+                <input type="range" id="brushSize" min="1" max="100" value="10">
+            </div>
+            <div class="control-item" id="opacity-container">
+                <label>Global Opacity</label>
+                <input type="range" id="globalOpacity" min="1" max="100" value="100">
+            </div>
+            <div class="control-item" id="pencil-grade-container" style="display: none;">
+                <label>Pencil Grade Layer</label>
+                <select id="pencilGrade">
+                    <option value="10H">10H</option><option value="5H">5H</option>
+                    <option value="2H">2H</option><option value="HB" selected>HB</option>
+                    <option value="2B">2B</option><option value="6B">6B</option>
+                    <option value="12B">12B</option>
+                </select>
+            </div>
+            <div class="control-item" id="font-container" style="display: none;">
+                <label>Vector Font Upload</label>
+                <label for="fontUpload" class="file-label">📤 Load Font (.ttf/.otf)</label>
+                <input type="file" id="fontUpload" accept=".ttf,.otf">
+            </div>
         </div>
 
-        <!-- Dynamic Pencil Grade Selector Panel -->
-        <div class="control-group" id="pencil-grade-container" style="display: none;">
-            <label>Pencil Grade (Graphite)</label>
-            <select id="pencilGrade" onchange="updatePencilSettings()">
-                <option value="10H">10H (Lightest)</option>
-                <option value="9H">9H</option>
-                <option value="8H">8H</option>
-                <option value="7H">7H</option>
-                <option value="6H">6H</option>
-                <option value="5H">5H</option>
-                <option value="4H">4H</option>
-                <option value="3H">3H</option>
-                <option value="2H">2H</option>
-                <option value="H">H</option>
-                <option value="F">F</option>
-                <option value="HB">HB</option>
-                <option value="B">B</option>
-                <option value="2B">2B</option>
-                <option value="3B">3B</option>
-                <option value="4B">4B</option>
-                <option value="5B">5B</option>
-                <option value="6B">6B</option>
-                <option value="7B">7B</option>
-                <option value="8B">8B</option>
-                <option value="9B">9B</option>
-                <option value="10B">10B</option>
-                <option value="11B">11B</option>
-                <option value="12B">12B (Darkest)</option>
-            </select>
+        <!-- DYNAMIC LAYERS MATRIX UI -->
+        <div class="section-box">
+            <h3>Layers Matrix</h3>
+            <button onclick="createLayer()" style="background-color: #1e1e24; border: 1px dashed #ffb703; color: #ffb703;">➕ Add New Layer</button>
+            <div id="layersContainer"></div>
         </div>
 
-        <div class="control-group" id="size-container">
-            <label>Size / Thickness</label>
-            <input type="range" id="brushSize" min="1" max="100" value="10">
+        <!-- DISK FILE SYSTEM LAYER UTILITIES -->
+        <div class="system-ops">
+            <h3>Project Workflow</h3>
+            <button id="exportNnsBtn" class="btn-success">💾 Save Project (.nns)</button>
+            <label for="importBtn" class="file-label" style="background-color: #5c677d;">📂 Import (.nns / .png)</label>
+            <input type="file" id="importBtn" accept=".nns,.png,image/png">
+            <button id="exportBtn">🖼️ Flatten to PNG</button>
+            <button id="clearBtn" class="btn-danger">🗑️ Clear Canvas</button>
         </div>
-
-        <div class="control-group" id="opacity-container">
-            <label>Global Opacity</label>
-            <input type="range" id="globalOpacity" min="1" max="100" value="100">
-        </div>
-
-        <!-- Custom Font Upload Section -->
-        <div class="control-group" id="font-container" style="display: none;">
-            <label>Text Custom Font</label>
-            <label class="file-label" for="fontUpload">Upload Font (.ttf/.otf)</label>
-            <input type="file" id="fontUpload" accept=".ttf,.otf">
-        </div>
-
-        <div class="section-title">Canvas Actions</div>
-        <button id="clearBtn" class="action-btn">Clear Canvas</button>
-        <button id="exportBtn" class="action-btn">Export Image (PNG)</button>
-        <label class="file-label action-btn" for="importBtn">Import Image</label>
-        <input type="file" id="importBtn" accept="image/*">
     </div>
 
-    <!-- MAIN APP CANVAS WORKSPACE -->
-    <div id="workspace">
+    <!-- MAIN VIEWPORT CONTEXT INTERFACE -->
+    <div id="canvas-viewport">
         <canvas id="paintCanvas" width="800" height="600"></canvas>
-        <div id="status-bar">Tip: Press and hold 'Alt' while creating shapes to lock aspect ratio constraints.</div>
     </div>
 
-    <!-- ENGINE APPLICATION CORE LOGIC -->
+    <!-- LAYER MATRIX CORE APPLICATION PIPELINE ENGINE -->
     <script>
         /**
-         * Nanas Engine - Application Logic Core
-         * Handles drawing, canvas calculations, tools, and dynamic file assets.
+         * Nanas Engine - Application Logic Core (v3.0 Layer Matrix Edition)
          */
 
-        // Initialize HTML canvas properties and set pixel context safety
-        const canvas = document.getElementById('paintCanvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        // Initialize primary HTML viewport canvas properties
+        const mainCanvas = document.getElementById('paintCanvas');
+        const mainCtx = mainCanvas.getContext('2d');
 
-        // Application State Parameters
+        // Application Core State
         let currentTool = 'brush';
         let isDrawing = false;
         let startX = 0;
         let startY = 0;
-        let snapshot = null; // Holds temporary pixel arrays for live shape preview boundaries
         let isAltPressed = false;
         let activeFont = 'Arial';
 
-        // Pencil grading profile array mapping opacity values and line sizes
+        // --- LAYER & HISTORY PIPELINE DATA MATRIX ---
+        let layers = [];         // Array of Layer Objects: { id, name, visible, opacity, canvas, ctx }
+        let activeLayer = null;  // Reference pointing directly to the currently selected active Layer Object
+        let actionHistory = [];  // Global tracking script for absolute file rebuild streams
+        let currentStrokePoints = []; 
+
+        // Pencil grading profiles
         const pencilGrades = {
             '10H': { opacity: 0.05, sizeMultiplier: 0.6 }, '9H': { opacity: 0.08, sizeMultiplier: 0.6 },
             '8H': { opacity: 0.12, sizeMultiplier: 0.7 }, '7H': { opacity: 0.15, sizeMultiplier: 0.7 },
@@ -345,84 +313,159 @@
             '11B':{ opacity: 0.99, sizeMultiplier: 1.6 }, '12B':{ opacity: 1.00, sizeMultiplier: 1.8 }
         };
 
-        // DOM References
+        // DOM Control References
         const colorPicker = document.getElementById('colorPicker');
         const brushSize = document.getElementById('brushSize');
         const globalOpacity = document.getElementById('globalOpacity');
         const pencilGradeSelect = document.getElementById('pencilGrade');
         const fontUpload = document.getElementById('fontUpload');
+        const layersContainer = document.getElementById('layersContainer');
 
         /* ==========================================================================
-           1. MAIN ENGINE OPERATIONS & UTILITIES
+           1. LAYER MANAGEMENT ENGINE CORE
            ========================================================================== */
 
-        /**
-         * Updates UI configurations and shifts application runtime state to specific tool profiles.
-         * @param {string} toolName - Selected application tool label.
-         */
+        function createLayer(name = `Layer ${layers.length + 1}`, visible = true, opacity = 1.0) {
+            const layerCanvas = document.createElement('canvas');
+            layerCanvas.width = mainCanvas.width;
+            layerCanvas.height = mainCanvas.height;
+            
+            const layerCtx = layerCanvas.getContext('2d', { willReadFrequently: true });
+            
+            const targetLayer = {
+                id: 'layer_' + Math.random().toString(36).substr(2, 9),
+                name: name,
+                visible: visible,
+                opacity: opacity,
+                canvas: layerCanvas,
+                ctx: layerCtx
+            };
+            
+            layers.push(targetLayer);
+            selectLayer(targetLayer.id);
+            updateLayersUI();
+            return targetLayer;
+        }
+
+        function selectLayer(id) {
+            const target = layers.find(l => l.id === id);
+            if (target) {
+                activeLayer = target;
+                updateLayersUI();
+            }
+        }
+
+        function deleteLayer(id) {
+            if (layers.length <= 1) {
+                alert("Cannot delete the final workspace layer structure.");
+                return;
+            }
+            const targetIndex = layers.findIndex(l => l.id === id);
+            if (targetIndex !== -1) {
+                layers.splice(targetIndex, 1);
+                if (activeLayer.id === id) {
+                    activeLayer = layers[Math.max(0, targetIndex - 1)];
+                }
+                
+                actionHistory.push({ tool: 'system_delete_layer', layerId: id });
+                
+                updateLayersUI();
+                composeLayersToViewport();
+            }
+        }
+
+        function composeLayersToViewport() {
+            mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            
+            layers.forEach(layer => {
+                if (layer.visible) {
+                    mainCtx.globalAlpha = layer.opacity;
+                    mainCtx.drawImage(layer.canvas, 0, 0);
+                }
+            });
+            mainCtx.globalAlpha = 1.0; 
+        }
+
+        function updateLayersUI() {
+            if (!layersContainer) return;
+            layersContainer.innerHTML = '';
+
+            [...layers].reverse().forEach(layer => {
+                const item = document.createElement('div');
+                item.className = `layer-item ${activeLayer.id === layer.id ? 'active' : ''}`;
+                item.style.display = 'flex';
+                item.style.alignItems = 'center';
+                item.style.justifyContent = 'space-between';
+                item.style.margin = '4px 0';
+                item.style.padding = '6px';
+
+                item.innerHTML = `
+                    <span class="layer-name" style="cursor:pointer; font-weight:${activeLayer.id === layer.id ? 'bold' : 'normal'}">${layer.name}</span>
+                    <div class="layer-controls-right">
+                        <button class="layer-toggle-vis">${layer.visible ? '👁️' : '❌'}</button>
+                        <button class="layer-delete-btn">🗑️</button>
+                    </div>
+                `;
+
+                item.querySelector('.layer-name').addEventListener('click', () => selectLayer(layer.id));
+                
+                item.querySelector('.layer-toggle-vis').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    layer.visible = !layer.visible;
+                    actionHistory.push({ tool: 'system_toggle_layer', layerId: layer.id, visible: layer.visible });
+                    updateLayersUI();
+                    composeLayersToViewport();
+                });
+
+                item.querySelector('.layer-delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteLayer(layer.id);
+                });
+
+                layersContainer.appendChild(item);
+            });
+        }
+
+        /* ==========================================================================
+           2. UTILITIES & FLOOD FILL INTERACTION
+           ========================================================================== */
+
         function setTool(toolName) {
             currentTool = toolName;
-            
-            // Manage CSS active design flags across control elements
             document.querySelectorAll('#sidebar button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`tool-${toolName}`).classList.add('active');
-
-            // Toggle conditional configurations UI panels
+            const targetBtn = document.getElementById(`tool-${toolName}`);
+            if (targetBtn) targetBtn.classList.add('active');
+            
             document.getElementById('pencil-grade-container').style.display = (toolName === 'pencil') ? 'flex' : 'none';
             document.getElementById('font-container').style.display = (toolName === 'text') ? 'flex' : 'none';
-            
-            // Control visibility of standard opacity controls for cleaner integration
             document.getElementById('opacity-container').style.display = (toolName === 'pencil' || toolName === 'eraser' || toolName === 'eyedropper' || toolName === 'bucket') ? 'none' : 'flex';
         }
 
-        /**
-         * Decodes hexadecimal colors into separate RGB data segments.
-         * @param {string} hex - Hexadecimal color notation (#ffffff).
-         */
         function hexToRgb(hex) {
             const parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return parsed ? {
-                r: parseInt(parsed[1], 16),
-                g: parseInt(parsed[2], 16),
-                b: parseInt(parsed[3], 16)
-            } : null;
+            return parsed ? { r: parseInt(parsed[1], 16), g: parseInt(parsed[2], 16), b: parseInt(parsed[3], 16) } : null;
         }
 
-        /**
-         * Mixes hexadecimal colors with custom transparent alpha opacity metrics.
-         */
         function hexToRgbaStr(hex, opacityAlpha) {
             const rgb = hexToRgb(hex);
             return rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacityAlpha})` : hex;
         }
 
-        // System keyboard listener bindings for shape lock checks
         window.addEventListener('keydown', (e) => { if (e.key === 'Alt') isAltPressed = true; });
         window.addEventListener('keyup', (e) => { if (e.key === 'Alt') isAltPressed = false; });
 
-        /* ==========================================================================
-           2. FLOOD FILL ENGINE (BUCKET TOOL)
-           ========================================================================== */
-
-        /**
-         * Executes a 4-way queue-based flood fill algorithm over the canvas array context.
-         */
-        function floodFill(xPosition, yPosition, fillColorHex) {
-            const initialPixel = ctx.getImageData(xPosition, yPosition, 1, 1).data;
+        function floodFill(targetCtx, targetCanvas, xPosition, yPosition, fillColorHex, recordAction = true, targetLayerId = null) {
+            const initialPixel = targetCtx.getImageData(xPosition, yPosition, 1, 1).data;
             const targetColor = hexToRgb(fillColorHex);
-            
             if (!targetColor) return;
 
-            // Boundary check: Skip filling if target and initial base matching values overlap
-            if (initialPixel[0] === targetColor.r && 
-                initialPixel[1] === targetColor.g && 
-                initialPixel[2] === targetColor.b && 
-                initialPixel[3] === 255) return;
+            if (initialPixel[0] === targetColor.r && initialPixel[1] === targetColor.g && 
+                initialPixel[2] === targetColor.b && initialPixel[3] === 255) return;
 
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const imgData = targetCtx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
             const dataStream = imgData.data;
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
+            const canvasWidth = targetCanvas.width;
+            const canvasHeight = targetCanvas.height;
 
             const coordinatesQueue = [[xPosition, yPosition]];
             const baseR = initialPixel[0];
@@ -436,136 +479,348 @@
 
                 const byteIndex = (currentY * canvasWidth + currentX) * 4;
 
-                if (dataStream[byteIndex] === baseR && 
-                    dataStream[byteIndex + 1] === baseG && 
-                    dataStream[byteIndex + 2] === baseB && 
-                    dataStream[byteIndex + 3] === baseA) {
+                if (dataStream[byteIndex] === baseR && dataStream[byteIndex + 1] === baseG && 
+                    dataStream[byteIndex + 2] === baseB && dataStream[byteIndex + 3] === baseA) {
                     
-                    // Rewrite standard pixel addresses with fill color configurations
                     dataStream[byteIndex] = targetColor.r;
                     dataStream[byteIndex + 1] = targetColor.g;
                     dataStream[byteIndex + 2] = targetColor.b;
                     dataStream[byteIndex + 3] = 255;
 
-                    // Push neighboring node targets into algorithm check stream loops
                     coordinatesQueue.push([currentX + 1, currentY]);
                     coordinatesQueue.push([currentX - 1, currentY]);
                     coordinatesQueue.push([currentX, currentY + 1]);
                     coordinatesQueue.push([currentX, currentY - 1]);
                 }
             }
-            ctx.putImageData(imgData, 0, 0);
+            targetCtx.putImageData(imgData, 0, 0);
+
+            if (recordAction) {
+                actionHistory.push({
+                    tool: 'bucket',
+                    layerId: targetLayerId || activeLayer.id,
+                    x: xPosition,
+                    y: yPosition,
+                    color: fillColorHex
+                });
+            }
         }
 
         /* ==========================================================================
-           3. MOUSE EVENT HANDLERS & GRAPHICS PROCESSING
+           3. WORKSPACE DRAWING INPUT MAPPING
            ========================================================================== */
 
-        canvas.addEventListener('mousedown', (e) => {
+        mainCanvas.addEventListener('mousedown', (e) => {
+            if (!activeLayer || !activeLayer.visible) return; 
             isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
+
+            const rect = mainCanvas.getBoundingClientRect();
             startX = Math.floor(e.clientX - rect.left);
             startY = Math.floor(e.clientY - rect.top);
             
-            // Capture snapshot array map state prior to layout alterations
-            snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-            // Compute active dynamic opacity scale (0.0 to 1.0 range mapping)
+            activeLayer.snapshot = activeLayer.ctx.getImageData(0, 0, mainCanvas.width, mainCanvas.height);
             const currentAlpha = globalOpacity.value / 100;
 
-            ctx.beginPath();
-            ctx.strokeStyle = hexToRgbaStr(colorPicker.value, currentAlpha);
-            ctx.fillStyle = hexToRgbaStr(colorPicker.value, currentAlpha);
-            ctx.lineWidth = brushSize.value;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
+            const targetCtx = activeLayer.ctx;
+            targetCtx.beginPath();
+            targetCtx.strokeStyle = hexToRgbaStr(colorPicker.value, currentAlpha);
+            targetCtx.fillStyle = hexToRgbaStr(colorPicker.value, currentAlpha);
+            targetCtx.lineWidth = brushSize.value;
+            targetCtx.lineCap = 'round';
+            targetCtx.lineJoin = 'round';
 
-            if (currentTool === 'brush') {
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(startX, startY);
-                ctx.stroke();
-            } else if (currentTool === 'pencil') {
-                const grade = pencilGrades[pencilGradeSelect.value];
-                const rgb = hexToRgb(colorPicker.value);
-                ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${grade.opacity})`;
-                ctx.lineWidth = Math.max(0.5, brushSize.value * grade.sizeMultiplier * 0.15);
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(startX, startY);
-                ctx.stroke();
-            } else if (currentTool === 'eraser') {
-                ctx.strokeStyle = '#ffffff'; // White out line paths cleanly
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(startX, startY);
-                ctx.stroke();
+            currentStrokePoints = [{ x: startX, y: startY }];
+
+            if (currentTool === 'brush' || currentTool === 'eraser' || currentTool === 'pencil') {
+                if (currentTool === 'pencil') {
+                    const grade = pencilGrades[pencilGradeSelect.value];
+                    const rgb = hexToRgb(colorPicker.value);
+                    targetCtx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${grade.opacity})`;
+                    targetCtx.lineWidth = Math.max(0.5, brushSize.value * grade.sizeMultiplier * 0.15);
+                } else if (currentTool === 'eraser') {
+                    targetCtx.strokeStyle = '#ffffff';
+                }
+                targetCtx.moveTo(startX, startY);
+                targetCtx.lineTo(startX, startY);
+                targetCtx.stroke();
+                composeLayersToViewport();
             } else if (currentTool === 'eyedropper') {
                 isDrawing = false;
-                const targetPixel = ctx.getImageData(startX, startY, 1, 1).data;
-                if (targetPixel[3] !== 0) { // Fall back onto pure white if node target matches clear transparency layers
+                const targetPixel = mainCtx.getImageData(startX, startY, 1, 1).data;
+                if (targetPixel[3] !== 0) {
                     colorPicker.value = "#" + ("000000" + ((targetPixel[0] << 16) | (targetPixel[1] << 8) | targetPixel[2]).toString(16)).slice(-6);
                 } else {
                     colorPicker.value = "#ffffff";
                 }
             } else if (currentTool === 'bucket') {
                 isDrawing = false;
-                floodFill(startX, startY, colorPicker.value);
+                floodFill(activeLayer.ctx, activeLayer.canvas, startX, startY, colorPicker.value, true, activeLayer.id);
+                composeLayersToViewport();
             } else if (currentTool === 'text') {
                 isDrawing = false;
-                const inputString = prompt("Enter text overlay to append into your workspace context layer:");
+                const inputString = prompt("Enter text overlay:");
                 if (inputString) {
-                    ctx.font = `${brushSize.value * 2}px ${activeFont}`;
-                    ctx.fillText(inputString, startX, startY);
+                    targetCtx.font = `${brushSize.value * 2}px ${activeFont}`;
+                    targetCtx.fillText(inputString, startX, startY);
+                    
+                    actionHistory.push({
+                        tool: 'text',
+                        layerId: activeLayer.id,
+                        text: inputString,
+                        x: startX,
+                        y: startY,
+                        font: activeFont,
+                        size: brushSize.value * 2,
+                        color: colorPicker.value,
+                        opacity: currentAlpha
+                    });
+                    composeLayersToViewport();
                 }
             }
         });
 
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
+        mainCanvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing || !activeLayer) return;
+            const rect = mainCanvas.getBoundingClientRect();
             const currentX = Math.floor(e.clientX - rect.left);
             const currentY = Math.floor(e.clientY - rect.top);
 
+            const targetCtx = activeLayer.ctx;
+
             if (currentTool === 'brush' || currentTool === 'eraser' || currentTool === 'pencil') {
-                ctx.lineTo(currentX, currentY);
-                ctx.stroke();
+                targetCtx.lineTo(currentX, currentY);
+                targetCtx.stroke();
+                currentStrokePoints.push({ x: currentX, y: currentY });
+                composeLayersToViewport();
             } else {
-                // Redraw baseline context canvas from pixel array matrix to prevent graphic ghost trails
-                ctx.putImageData(snapshot, 0, 0);
+                targetCtx.putImageData(activeLayer.snapshot, 0, 0);
                 
                 let deltaWidth = currentX - startX;
                 let deltaHeight = currentY - startY;
 
-                // Apply geometric locking configurations when 'Alt' is held down
                 if (isAltPressed) {
                     const edgeValue = Math.max(Math.abs(deltaWidth), Math.abs(deltaHeight));
                     deltaWidth = deltaWidth < 0 ? -edgeValue : edgeValue;
                     deltaHeight = deltaHeight < 0 ? -edgeValue : edgeValue;
                 }
 
-                ctx.beginPath();
+                targetCtx.beginPath();
                 if (currentTool === 'square') {
-                    ctx.strokeRect(startX, startY, deltaWidth, deltaHeight);
+                    targetCtx.strokeRect(startX, startY, deltaWidth, deltaHeight);
                 } else if (currentTool === 'circle') {
                     const circleRadius = Math.sqrt(deltaWidth * deltaWidth + deltaHeight * deltaHeight);
-                    ctx.arc(startX, startY, circleRadius, 0, 2 * Math.PI);
-                    ctx.stroke();
+                    targetCtx.arc(startX, startY, circleRadius, 0, 2 * Math.PI);
+                    targetCtx.stroke();
                 } else if (currentTool === 'triangle') {
-                    ctx.moveTo(startX + deltaWidth / 2, startY);
-                    ctx.lineTo(startX, startY + deltaHeight);
-                    ctx.lineTo(startX + deltaWidth, startY + deltaHeight);
-                    ctx.closePath();
-                    ctx.stroke();
+                    targetCtx.moveTo(startX + deltaWidth / 2, startY);
+                    targetCtx.lineTo(startX, startY + deltaHeight);
+                    targetCtx.lineTo(startX + deltaWidth, startY + deltaHeight);
+                    targetCtx.closePath();
+                    targetCtx.stroke();
                 }
+                composeLayersToViewport();
             }
         });
 
-        canvas.addEventListener('mouseup', () => isDrawing = false);
-        canvas.addEventListener('mouseleave', () => isDrawing = false);
+        mainCanvas.addEventListener('mouseup', (e) => {
+            if (!isDrawing || !activeLayer) return;
+            isDrawing = false;
+
+            const rect = mainCanvas.getBoundingClientRect();
+            const endX = Math.floor(e.clientX - rect.left);
+            const endY = Math.floor(e.clientY - rect.top);
+            const currentAlpha = globalOpacity.value / 100;
+
+            if (currentTool === 'brush' || currentTool === 'eraser' || currentTool === 'pencil') {
+                actionHistory.push({
+                    tool: currentTool,
+                    layerId: activeLayer.id,
+                    points: currentStrokePoints,
+                    color: colorPicker.value,
+                    size: brushSize.value,
+                    opacity: currentAlpha,
+                    pencilGrade: currentTool === 'pencil' ? pencilGradeSelect.value : null
+                });
+            } else if (['square', 'circle', 'triangle'].includes(currentTool)) {
+                let deltaWidth = endX - startX;
+                let deltaHeight = endY - startY;
+                if (isAltPressed) {
+                    const edgeValue = Math.max(Math.abs(deltaWidth), Math.abs(deltaHeight));
+                    deltaWidth = deltaWidth < 0 ? -edgeValue : edgeValue;
+                    deltaHeight = deltaHeight < 0 ? -edgeValue : edgeValue;
+                }
+                actionHistory.push({
+                    tool: currentTool,
+                    layerId: activeLayer.id,
+                    startX: startX,
+                    startY: startY,
+                    deltaWidth: deltaWidth,
+                    deltaHeight: deltaHeight,
+                    color: colorPicker.value,
+                    size: brushSize.value,
+                    opacity: currentAlpha
+                });
+            }
+        });
+
+        mainCanvas.addEventListener('mouseleave', () => isDrawing = false);
 
         /* ==========================================================================
-           4. FILE SYSTEM UTILITY ARCHITECTURE (IMPORT, EXPORT & FONTS)
+           4. ADVANCED .NNS PROTOCOL ENCODER / DECODER
            ========================================================================== */
 
-        // Custom Font parser engine hook via inline dynamic context compilation
+        function rebuildWorkspaceFromNns(nnsProjectData) {
+            layers = [];
+            actionHistory = [];
+            
+            nnsProjectData.layersStructure.forEach(layerMeta => {
+                createLayer(layerMeta.name, layerMeta.visible, layerMeta.opacity);
+                layers[layers.length - 1].id = layerMeta.id; 
+            });
+
+            nnsProjectData.history.forEach(action => {
+                if (action.tool === 'system_toggle_layer') {
+                    const match = layers.find(l => l.id === action.layerId);
+                    if (match) match.visible = action.visible;
+                    actionHistory.push(action);
+                    return;
+                }
+                if (action.tool === 'system_delete_layer') {
+                    const targetIdx = layers.findIndex(l => l.id === action.layerId);
+                    if (targetIdx !== -1) layers.splice(targetIdx, 1);
+                    actionHistory.push(action);
+                    return;
+                }
+
+                const activeLayerRef = layers.find(l => l.id === action.layerId);
+                if (!activeLayerRef) return; 
+
+                const targetCtx = activeLayerRef.ctx;
+                targetCtx.beginPath();
+                targetCtx.lineCap = 'round';
+                targetCtx.lineJoin = 'round';
+
+                if (['brush', 'eraser', 'pencil'].includes(action.tool)) {
+                    if (action.tool === 'pencil') {
+                        const grade = pencilGrades[action.pencilGrade || 'HB'];
+                        const rgb = hexToRgb(action.color);
+                        targetCtx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${grade.opacity})`;
+                        targetCtx.lineWidth = Math.max(0.5, action.size * grade.sizeMultiplier * 0.15);
+                    } else {
+                        targetCtx.strokeStyle = action.tool === 'eraser' ? '#ffffff' : hexToRgbaStr(action.color, action.opacity);
+                        targetCtx.lineWidth = action.size;
+                    }
+
+                    if (action.points && action.points.length > 0) {
+                        targetCtx.moveTo(action.points[0].x, action.points[0].y);
+                        action.points.forEach(pt => targetCtx.lineTo(pt.x, pt.y));
+                        targetCtx.stroke();
+                    }
+                } else if (action.tool === 'square') {
+                    targetCtx.strokeStyle = hexToRgbaStr(action.color, action.opacity);
+                    targetCtx.lineWidth = action.size;
+                    targetCtx.strokeRect(action.startX, action.startY, action.deltaWidth, action.deltaHeight);
+                } else if (action.tool === 'circle') {
+                    targetCtx.strokeStyle = hexToRgbaStr(action.color, action.opacity);
+                    targetCtx.lineWidth = action.size;
+                    const radius = Math.sqrt(action.deltaWidth * action.deltaWidth + action.deltaHeight * action.deltaHeight);
+                    targetCtx.arc(action.startX, action.startY, radius, 0, 2 * Math.PI);
+                    targetCtx.stroke();
+                } else if (action.tool === 'triangle') {
+                    targetCtx.strokeStyle = hexToRgbaStr(action.color, action.opacity);
+                    targetCtx.lineWidth = action.size;
+                    targetCtx.moveTo(action.startX + action.deltaWidth / 2, action.startY);
+                    targetCtx.lineTo(targetCtx.startX, targetCtx.startY + action.deltaHeight); // Safety boundary fallback fix
+                    targetCtx.lineTo(action.startX, action.startY + action.deltaHeight);
+                    targetCtx.lineTo(action.startX + action.deltaWidth, action.startY + action.deltaHeight);
+                    targetCtx.closePath();
+                    targetCtx.stroke();
+                } else if (action.tool === 'bucket') {
+                    floodFill(activeLayerRef.ctx, activeLayerRef.canvas, action.x, action.y, action.color, false, activeLayerRef.id);
+                } else if (action.tool === 'text') {
+                    targetCtx.fillStyle = hexToRgbaStr(action.color, action.opacity);
+                    targetCtx.font = `${action.size}px ${action.font}`;
+                    targetCtx.fillText(action.text, action.x, action.y);
+                }
+                
+                actionHistory.push(action);
+            });
+
+            if (layers.length > 0) selectLayer(layers[layers.length - 1].id);
+            updateLayersUI();
+            composeLayersToViewport();
+        }
+
+        document.getElementById('exportNnsBtn').addEventListener('click', () => {
+            const packedLayersMeta = layers.map(l => ({
+                id: l.id,
+                name: l.name,
+                visible: l.visible,
+                opacity: l.opacity
+            }));
+
+            const packageMetaData = {
+                engineSignature: "NANAS_ENGINE_MULTI_LAYER_DATA",
+                canvasWidth: mainCanvas.width,
+                canvasHeight: mainCanvas.height,
+                savedAt: new Date().toISOString(),
+                layersStructure: packedLayersMeta,
+                history: actionHistory
+            };
+
+            const dataBlob = new Blob([JSON.stringify(packageMetaData, null, 2)], { type: "application/json" });
+            const fileAnchorElement = document.createElement('a');
+            fileAnchorElement.download = 'layered-workspace-project.nns';
+            fileAnchorElement.href = URL.createObjectURL(dataBlob);
+            fileAnchorElement.click();
+        });
+
+        document.getElementById('importBtn').addEventListener('change', (e) => {
+            const importedFile = e.target.files[0];
+            if (!importedFile) return;
+
+            const fileExtension = importedFile.name.split('.').pop().toLowerCase();
+
+            if (fileExtension === 'nns') {
+                const fileReader = new FileReader();
+                fileReader.onload = function(event) {
+                    try {
+                        const parsedProject = JSON.parse(event.target.result);
+                        if (parsedProject.engineSignature === "NANAS_ENGINE_MULTI_LAYER_DATA") {
+                            rebuildWorkspaceFromNns(parsedProject);
+                            alert("Layered project workspace setup complete!");
+                        } else if (parsedProject.engineSignature === "NANAS_ENGINE_VECTOR_DATA") {
+                            alert("Legacy single-layer workspace profile detected. Converting project configuration format...");
+                            const updatedWrapper = {
+                                layersStructure: [{ id: 'layer_default', name: 'Layer 1', visible: true, opacity: 1.0 }],
+                                history: parsedProject.history.map(act => { act.layerId = 'layer_default'; return act; })
+                            };
+                            rebuildWorkspaceFromNns(updatedWrapper);
+                        } else {
+                            alert("Invalid signature mapping context. File structural validation failure.");
+                        }
+                    } catch (err) {
+                        alert("Error unpacking vector file array layers.");
+                    }
+                };
+                fileReader.readAsText(importedFile);
+            } else {
+                const readerInstance = new FileReader();
+                readerInstance.onload = function(event) {
+                    const runtimeImageContainer = new Image();
+                    runtimeImageContainer.onload = function() {
+                        layers = [];
+                        actionHistory = [];
+                        const importedLayer = createLayer("Imported Flat Layer");
+                        importedLayer.ctx.drawImage(runtimeImageContainer, 0, 0, mainCanvas.width, mainCanvas.height);
+                        composeLayersToViewport();
+                    };
+                    runtimeImageContainer.src = event.target.result;
+                };
+                readerInstance.readAsDataURL(importedFile);
+            }
+        });
+
         fontUpload.addEventListener('change', (e) => {
             const targetFile = e.target.files[0];
             if (targetFile) {
@@ -584,36 +839,24 @@
             }
         });
 
-        // Clear canvas system check loop
         document.getElementById('clearBtn').addEventListener('click', () => {
-            if (confirm("Reset current canvas viewport layers? All unstored modifications will be dropped.")) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (confirm("Reset current canvas layers? All unstored modifications will be dropped.")) {
+                layers = [];
+                actionHistory = [];
+                createLayer('Background Base');
+                composeLayersToViewport();
             }
         });
 
-        // Canvas image export workflow stream setup
         document.getElementById('exportBtn').addEventListener('click', () => {
             const fileAnchorElement = document.createElement('a');
-            fileAnchorElement.download = 'nanas-engine-canvas-output.png';
-            fileAnchorElement.href = canvas.toDataURL();
+            fileAnchorElement.download = 'nanas-engine-flattened-output.png';
+            fileAnchorElement.href = mainCanvas.toDataURL();
             fileAnchorElement.click();
         });
 
-        // Structural workflow import mapping system configurations
-        document.getElementById('importBtn').addEventListener('change', (e) => {
-            const importedImageFile = e.target.files[0];
-            if (importedImageFile) {
-                const readerInstance = new FileReader();
-                readerInstance.onload = function(event) {
-                    const runtimeImageContainer = new Image();
-                    runtimeImageContainer.onload = function() {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(runtimeImageContainer, 0, 0, canvas.width, canvas.height);
-                    };
-                    runtimeImageContainer.src = event.target.result;
-                };
-                readerInstance.readAsDataURL(importedImageFile);
-            }
+        document.addEventListener("DOMContentLoaded", () => {
+            createLayer('Background Base');
         });
     </script>
 </body>
