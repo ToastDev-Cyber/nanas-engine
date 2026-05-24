@@ -1,94 +1,37 @@
 /* ==========================================================================
-   🍍 NANAS ENGINE - COMPLETE UNIFIED WORKSPACE STYLING
-   ========================================================================== */
-
-:root {
-  --bg-main: #0b0b0d;
-  --panel-bg: rgba(20, 20, 25, 0.85);
-  --panel-border: rgba(255, 255, 255, 0.08);
-  
-  /* Accent States */
-  --accent-primary: #ffe600;      /* Signature Pineapple Yellow */
-  --accent-danger: #ff4d4d;
-  --accent-success: #2ecc71;
-  
-  /* Text Layers */
-  --text-bright: #ffffff;
-  --text-normal: #dcddde;
-  --text-dimmed: #72767d;
-  
-  /* Layout Constants */
-  --radius-main: 12px;
-  --radius-inner: 8px;
-  --blur-strength: 16px;
-  --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* 🌌 Global Reset Framework */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-body {
-  background-color: var(--bg-main);
-  color: var(--text-normal);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-}
-
-/* ==========================================================================
-   🗺️ CANVAS VIEWPORT FRAME
-   ========================================================================== */
-
-#canvasContainer {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
-  background-size: 24px 24px;
-}
-
-canvas {
-  background-color: #ffffff;
-  display: block;
-  cursor: crosshair;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-  border-radius: 4px;
-}
-
-/* ==========================================================================
-   🎛️ GLASSMORPHISM CONTROL TOOLBAR DOCK
+   🎛️ GLASSMORPHISM CONTROL TOOLBAR DOCK (VERTICAL LEFT-SIDEBAR)
    ========================================================================== */
 
 #toolbar {
   position: fixed;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  left: 24px;
+  transform: translateY(-50%); /* Centers toolbar vertically along the left edge */
   z-index: 1000;
   
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-main);
-  padding: 8px 16px;
+  padding: 16px 12px; /* Adjusted padding for vertical symmetry */
   
   display: flex;
+  flex-direction: column; /* Stack tools vertically */
   align-items: center;
   gap: 14px;
   
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 
+  box-shadow: 16px 0 40px rgba(0, 0, 0, 0.5), 
               inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(var(--blur-strength));
   -webkit-backdrop-filter: blur(var(--blur-strength));
+  
+  max-height: calc(100vh - 48px); /* Prevents spilling off small laptop views */
+  overflow-y: auto; /* Adds clean scroll mechanics if toolsets expand */
+}
+
+/* Hide native scrollbar tracks inside the left sidebar dock */
+#toolbar::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
 }
 
 /* 🍍 Brand Placement */
@@ -96,7 +39,7 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-right: 2px;
+  padding-bottom: 6px; /* Shifted padding from side to bottom */
 }
 
 #engineLogo {
@@ -106,260 +49,46 @@ canvas {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
-/* 🔗 Segments and Separators */
+/* 🔗 Vertical Segments and Separators */
 .tool-section {
   display: flex;
+  flex-direction: column; /* Align internal groupings vertically */
   align-items: center;
   gap: 8px;
+  width: 100%;
 }
 
 .separator {
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  padding-left: 14px;
+  border-left: none;
+  padding-left: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 14px;
+  width: 100%; /* Spans across full panel width */
 }
 
 .right-align {
-  margin-left: auto;
+  margin-top: auto; /* Pushes bottom utility layers downwards in vertical arrays */
+  margin-left: 0;
 }
 
-/* ==========================================================================
-   🕹️ TOOLS & BUTTON INTERACTION CONFIGURATIONS
-   ========================================================================== */
-
-.tool-btn, .action-btn {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-inner);
-  color: var(--text-normal);
-  font-size: 13px;
-  font-weight: 500;
-  padding: 8px 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: var(--transition-smooth);
-}
-
-.tool-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: var(--text-bright);
-}
-
-/* ⭐ Active Highlights */
-.tool-btn.active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: #000000;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(255, 230, 0, 0.25);
-}
-
-/* 🔵 File Import Action */
-.action-btn.import-style {
-  background: rgba(44, 130, 201, 0.15);
-  border-color: rgba(44, 130, 201, 0.25);
-  color: #5cace2;
-}
-
-.action-btn.import-style:hover {
-  background: rgba(44, 130, 201, 0.25);
-  border-color: rgba(44, 130, 201, 0.4);
-  color: #7fbfeb;
-}
-
-/* 🔴 Clear Screen Action */
-.action-btn.clear-style {
-  background: rgba(255, 77, 77, 0.1);
-  border-color: rgba(255, 77, 77, 0.2);
-  color: #ff6666;
-}
-
-.action-btn.clear-style:hover {
-  background: var(--accent-danger);
-  border-color: var(--accent-danger);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(255, 77, 77, 0.25);
-}
-
-/* ==========================================================================
-   📂 DROPDOWNS & FORMAT SELECTORS (BLACK MATRIX MODIFIERS)
-   ========================================================================== */
-
-/* 1️⃣ Split-Button Format Selector */
-.format-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-inner);
-  overflow: hidden;
-  height: 34px;
-  transition: var(--transition-smooth);
-}
-
-.format-group:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-#exportFormat {
-  background: transparent;
-  border: none;
-  color: var(--text-normal);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 0 10px;
-  height: 100%;
-  outline: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-.format-group .action-btn.export-style {
-  border: none;
-  border-radius: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(46, 204, 113, 0.15);
-  color: #4ed98a;
-  height: 100%;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.format-group .action-btn.export-style:hover {
-  background: var(--accent-success);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.25);
-}
-
-/* 2️⃣ In-Line Font Selector */
-#fontSelectorGroup {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-#fontSelect {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-inner);
-  color: var(--text-bright);
-  padding: 0 10px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  height: 34px;
-  outline: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  appearance: none;
-  -webkit-appearance: none;
-  transition: var(--transition-smooth);
-}
-
-#fontSelect:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-/* 🖤 Shared Pitch-Black Context Menu Lists */
-#exportFormat option,
-#fontSelect option {
-  background-color: #000000;
-  color: var(--text-normal);
-  padding: 8px;
-}
-
-/* ==========================================================================
-   🎨 ATTRIBUTE SLIDERS & PICKERS
-   ========================================================================== */
-
-#colorPicker {
-  background: none;
-  border: none;
-  cursor: pointer;
-  height: 32px;
-  width: 32px;
-  padding: 0;
-  transition: var(--transition-smooth);
-}
-
-#colorPicker::-webkit-color-swatch-wrapper { padding: 0; }
-#colorPicker::-webkit-color-swatch { 
-  border: 1px solid rgba(255, 255, 255, 0.2); 
-  border-radius: 50%; 
-}
-
-#colorPicker:hover {
-  transform: scale(1.08);
+/* Make sure buttons fill the width nicely */
+.tool-btn, .action-btn, .format-group {
+  width: 100%;
+  justify-content: flex-start; /* Keeps icons/labels anchored cleanly on the left */
 }
 
 .slider-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-dimmed);
-  font-size: 12px;
-  font-weight: 600;
+  flex-direction: column; /* Stacks label, slider track, and value text */
+  gap: 4px;
+  width: 100%;
+  text-align: center;
 }
 
 #brushSize {
-  -webkit-appearance: none;
-  appearance: none;
-  background: rgba(255, 255, 255, 0.1);
-  height: 4px;
-  border-radius: 2px;
-  width: 80px;
-  outline: none;
-  cursor: pointer;
-}
-
-#brushSize::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  background: var(--text-bright);
-  height: 12px;
-  width: 12px;
-  border-radius: 50%;
-  transition: var(--transition-smooth);
-}
-
-#brushSize::-webkit-slider-thumb:hover {
-  background: var(--accent-primary);
-  transform: scale(1.2);
+  width: 100%; /* Matches button panel footprint sizes */
 }
 
 #sizeVal {
-  color: var(--text-normal);
-  font-variant-numeric: tabular-nums;
-  min-width: 38px;
-  text-align: right;
-}
-
-/* ==========================================================================
-   🔤 OVERLAY INTERACTIVE TYPING BOX
-   ========================================================================== */
-
-.canvas-textarea {
-  position: absolute;
-  background: transparent;
-  border: 1px dashed var(--accent-primary);
-  outline: none;
-  resize: none;
-  overflow: hidden;
-  white-space: pre;
-  padding: 0;
-  margin: 0;
-  line-height: 1;
-  z-index: 10000;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+  text-align: center;
+  min-width: unset;
 }
