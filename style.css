@@ -185,24 +185,8 @@ canvas {
 }
 
 /* ==========================================================================
-   📂 EXPORT CONTAINER DROPDOWN BLOCKS (FIXED ALIGNMENT)
+   📂 BLACK EXPORT DROPDOWN STYLING
    ========================================================================== */
-
-.format-group {
-  display: flex;
-  align-items: center; /* Forces vertical centering */
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-inner);
-  overflow: hidden;
-  height: 34px; /* Explicit height to lock both elements inside */
-  transition: var(--transition-smooth);
-}
-
-.format-group:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-}
 
 #exportFormat {
   background: transparent;
@@ -212,35 +196,20 @@ canvas {
   font-size: 12px;
   font-weight: 500;
   padding: 0 10px;
-  height: 100%; /* Spans full height of parent */
+  height: 100%;
   outline: none;
   cursor: pointer;
   display: flex;
   align-items: center;
+  -webkit-appearance: none; /* Removes standard browser arrow mapping */
+  appearance: none;
 }
 
+/* 🖤 Makes the actual popup menu options pitch black */
 #exportFormat option {
-  background: #141419;
+  background-color: #000000;
   color: var(--text-normal);
-}
-
-.format-group .action-btn.export-style {
-  border: none;
-  border-radius: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(46, 204, 113, 0.15);
-  color: #4ed98a;
-  height: 100%; /* Matches dropdown height perfectly */
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.format-group .action-btn.export-style:hover {
-  background: var(--accent-success);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.25);
+  padding: 8px;
 }
 /* ==========================================================================
    🎨 TOOL SPECIFIC MODIFIERS (COLOR & TRACK BRUSH RANGE)
