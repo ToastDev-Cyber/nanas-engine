@@ -44,6 +44,20 @@ canvas {
     z-index: 100;
 }
 
+/* 🍍 Small Logo Rules */
+#logoContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 5px;
+}
+
+#engineLogo {
+    height: 24px;         /* 👈 Perfect small icon size scale */
+    width: auto;          /* Keeps original aspect ratio dimensions */
+    object-fit: contain;
+}
+
 .tool-section {
     display: flex;
     align-items: center;
@@ -131,7 +145,7 @@ canvas {
 
 /* 🔤 Dynamic Input Textbox Overlay */
 .canvas-textarea {
-    position: absolute; /* CRITICAL: Allows x/y script placement */
+    position: absolute;
     background: transparent;
     border: 1px dashed #ffe600;
     outline: none;
@@ -141,5 +155,5 @@ canvas {
     padding: 0;
     margin: 0;
     line-height: 1;
-    z-index: 10; /* Placed exactly over drawing canvas */
+    z-index: 10;
 }
