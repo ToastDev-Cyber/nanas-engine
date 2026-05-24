@@ -11,11 +11,12 @@
     <div id="toolbar">
         <div class="logo">🍍 Nanas Engine</div>
         
-        <!-- Shape Tools -->
+        <!-- Shape and Text Engine Core Tools -->
         <div class="control-group">
             <button class="tool-btn active" id="brushTool">🖌️ Brush</button>
             <button class="tool-btn" id="squareTool">⬛ Square</button>
             <button class="tool-btn" id="circleTool">⭕ Circle</button>
+            <button class="tool-btn" id="textTool">🔤 Text</button>
         </div>
 
         <div class="control-group">
@@ -25,14 +26,17 @@
         
         <div class="control-group">
             <label for="brushSize">Size:</label>
-            <input type="range" id="brushSize" min="1" max="50" value="5">
-            <span id="sizeVal">5px</span>
+            <input type="range" id="brushSize" min="8" max="72" value="24">
+            <span id="sizeVal">24px</span>
         </div>
 
         <button id="clearBtn" class="danger-btn">Clear Canvas</button>
     </div>
 
-    <canvas id="paintCanvas"></canvas>
+    <!-- The container holding both the rendering canvas and live editing fields -->
+    <div id="canvasContainer">
+        <canvas id="paintCanvas"></canvas>
+    </div>
 
     <script src="app.js"></script>
 </body>
