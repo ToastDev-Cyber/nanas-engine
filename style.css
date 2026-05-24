@@ -2,121 +2,144 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    user-select: none;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #eef2f3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    background-color: #1a1a1a;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     height: 100vh;
     overflow: hidden;
 }
 
-#toolbar {
-    background-color: #ffffff;
-    width: 100%;
-    padding: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    z-index: 10;
-}
-
-.logo {
-    font-weight: 800;
-    font-size: 18px;
-    color: #eab308;
-    font-family: sans-serif;
-    user-select: none;
-}
-
-.control-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-}
-
-.tool-btn {
-    background-color: #f3f4f6;
-    color: #1f2937;
-    border: 1px solid #d1d5db;
-    padding: 8px 12px;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.1s ease;
-}
-
-.tool-btn:hover {
-    background-color: #e5e7eb;
-}
-
-.tool-btn.active {
-    background-color: #4f46e5;
-    color: white;
-    border-color: #4f46e5;
-}
-
-input[type="color"] {
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-input[type="range"] {
-    cursor: pointer;
-    accent-color: #4f46e5;
-}
-
-.danger-btn {
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.danger-btn:hover {
-    background-color: #dc2626;
-}
-
+/* 🗺️ Workspace Layout */
 #canvasContainer {
-    position: relative;
-    flex-grow: 1;
-    width: 100%;
+    position: relative; /* CRITICAL: Holds typed text boxes onto their exact coordinates */
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
 canvas {
     background-color: #ffffff;
-    cursor: crosshair;
     display: block;
-    width: 100%;
-    height: 100%;
+    cursor: crosshair;
 }
 
-/* Text area helper fallback styling */
-.canvas-textarea {
+/* 🎛️ Floating Toolbar System */
+#toolbar {
     position: absolute;
-    border: 1px dashed #4f46e5;
-    background: transparent;
-    overflow: hidden;
-    resize: none;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(35, 35, 35, 0.9);
+    border: 1px solid #444;
+    border-radius: 12px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+}
+
+.tool-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.separator {
+    border-left: 1px solid #444;
+    padding-left: 15px;
+}
+
+.right-align {
+    margin-left: auto;
+}
+
+/* 🕹️ Buttons and Sliders */
+.tool-btn, .action-btn {
+    background-color: #2a2a2a;
+    border: 1px solid #555;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 14px;
+    transition: all 0.2s ease;
+}
+
+.tool-btn:hover, .action-btn:hover {
+    background-color: #383838;
+    border-color: #777;
+}
+
+.tool-btn.active {
+    background-color: #ffe600;
+    border-color: #ffe600;
+    color: #111;
+    font-weight: 600;
+}
+
+.action-btn {
+    background-color: #8c2020;
+    border-color: #b33636;
+}
+
+.action-btn:hover {
+    background-color: #b33636;
+}
+
+#colorPicker {
+    background: none;
+    border: none;
+    cursor: pointer;
+    height: 36px;
+    width: 40px;
+}
+
+.slider-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #aaa;
+    font-size: 12px;
+}
+
+#brushSize {
+    cursor: pointer;
+    accent-color: #ffe600;
+}
+
+#fontSelectorGroup {
+    color: #fff;
+    font-size: 14px;
+}
+
+#fontSelect {
+    background-color: #2a2a2a;
+    border: 1px solid #555;
+    border-radius: 6px;
+    color: #fff;
+    padding: 6px 10px;
     outline: none;
+    cursor: pointer;
+}
+
+/* 🔤 Dynamic Input Textbox Overlay */
+.canvas-textarea {
+    position: absolute; /* CRITICAL: Allows x/y script placement */
+    background: transparent;
+    border: 1px dashed #ffe600;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+    white-space: pre;
     padding: 0;
     margin: 0;
-    white-space: pre;
     line-height: 1;
-    font-family: 'NanasEngineFont', sans-serif;
+    z-index: 10; /* Placed exactly over drawing canvas */
 }
