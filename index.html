@@ -9,9 +9,15 @@
 <body>
 
     <div id="toolbar">
-        <!-- Logo Element for Nanas Engine -->
         <div class="logo">🍍 Nanas Engine</div>
         
+        <!-- Shape Tools -->
+        <div class="control-group">
+            <button class="tool-btn active" id="brushTool">🖌️ Brush</button>
+            <button class="tool-btn" id="squareTool">⬛ Square</button>
+            <button class="tool-btn" id="circleTool">⭕ Circle</button>
+        </div>
+
         <div class="control-group">
             <label for="colorPicker">Color:</label>
             <input type="color" id="colorPicker" value="#4f46e5">
@@ -23,7 +29,7 @@
             <span id="sizeVal">5px</span>
         </div>
 
-        <button id="clearBtn">Clear Canvas</button>
+        <button id="clearBtn" class="danger-btn">Clear Canvas</button>
     </div>
 
     <canvas id="paintCanvas"></canvas>
