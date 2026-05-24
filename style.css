@@ -1,212 +1,183 @@
-/* ==========================================================================
-   1. GLOBAL RESET & BASE SETTINGS
-   ========================================================================== */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    user-select: none; /* Prevents text highlighting while dragging brushes */
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
 }
 
 body {
-    background-color: #121212;
-    color: #e0e0e0;
+    background-color: #1e1e24;
+    color: #f5f5f7;
     display: flex;
     height: 100vh;
     overflow: hidden;
 }
 
-/* Custom scrollbar behavior for the sidebar */
-::-webkit-scrollbar {
-    width: 6px;
-}
-::-webkit-scrollbar-track {
-    background: #1e1e1e;
-}
-::-webkit-scrollbar-thumb {
-    background: #3a3a3a;
-    border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #ffb703;
-}
-
-/* ==========================================================================
-   2. SIDEBAR NAVIGATION PANEL (DARK MODE)
-   ========================================================================== */
+/* Sidebar Interface Layout */
 #sidebar {
-    width: 290px;
-    background-color: #1e1e1e;
-    border-right: 1px solid #2d2d2d;
+    width: 280px;
+    background-color: #2b2b36;
+    border-right: 2px solid #3d3d4f;
     display: flex;
     flex-direction: column;
-    padding: 24px 18px;
-    gap: 18px;
+    padding: 15px;
+    gap: 15px;
     overflow-y: auto;
-    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
-    z-index: 10;
 }
 
-h1 {
-    font-size: 1.4rem;
+h2, h3 {
     color: #ffb703;
-    text-align: center;
-    margin-bottom: 8px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    font-size: 1.1rem;
     text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #3d3d4f;
+    padding-bottom: 5px;
 }
 
-.section-title {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #777;
-    margin-top: 8px;
-    font-weight: bold;
-    border-bottom: 1px solid #2d2d2d;
-    padding-bottom: 4px;
+.section-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-/* ==========================================================================
-   3. UI INPUTS, GRIDS & COMPONENTS
-   ========================================================================== */
 .tool-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
 }
 
-/* Shared styling across standard buttons and file upload facades */
-button, .file-label {
-    background-color: #262626;
-    color: #dcdcdc;
-    border: 1px solid #383838;
-    padding: 10px 12px;
+button, label.file-label {
+    background-color: #3d3d4f;
+    color: #f5f5f7;
+    border: none;
+    padding: 10px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 500;
-    transition: all 0.15s ease-in-out;
+    font-weight: 600;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
     text-align: center;
 }
 
-button:hover, .file-label:hover {
-    background-color: #323232;
-    border-color: #ffb703;
+button:hover, label.file-label:hover {
+    background-color: #4e4e66;
     color: #ffffff;
 }
 
-/* Active Engine State Selection Highlight */
 button.active {
     background-color: #ffb703;
-    color: #121212;
-    font-weight: 600;
-    border-color: #ffb703;
-    box-shadow: 0 0 10px rgba(255, 183, 3, 0.2);
+    color: #1e1e24;
+    box-shadow: 0 0 10px rgba(255, 183, 3, 0.4);
 }
 
-.control-group {
+/* Tool & Parameter Controls Block */
+.control-item {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-}
-
-.control-group label {
-    font-size: 0.8rem;
-    color: #b0b0b0;
-}
-
-/* Native Select Dropdowns & Sliders */
-select, input[type="range"] {
-    width: 100%;
-    background-color: #262626;
-    color: #e0e0e0;
-    border: 1px solid #383838;
-    padding: 8px;
-    border-radius: 6px;
-    outline: none;
+    gap: 4px;
     font-size: 0.85rem;
+    color: #cbd5e1;
 }
 
-select:focus {
-    border-color: #ffb703;
-}
-
-/* Color Picker Mask Styling */
-input[type="color"] {
-    -webkit-appearance: none;
-    border: 1px solid #383838;
+input[type="range"], select, input[type="color"] {
     width: 100%;
-    height: 38px;
-    border-radius: 6px;
+    padding: 6px;
+    background-color: #1e1e24;
+    border: 1px solid #3d3d4f;
+    border-radius: 4px;
+    color: #fff;
+    outline: none;
+}
+
+input[type="color"] {
+    height: 40px;
     cursor: pointer;
-    background: none;
-    padding: 0;
+    padding: 2px;
 }
 
-input[type="color"]::-webkit-color-swatch-wrapper {
-    padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch {
-    border: none;
-    border-radius: 5px;
-}
-
-/* Hidden elements matching standard browser file pickers */
 input[type="file"] {
     display: none;
 }
 
-/* Action Utilities Layout Context */
-.action-btn {
-    width: 100%;
+/* Layers Management Panel Element Structures */
+#layersContainer {
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 5px;
 }
 
-#clearBtn {
-    border-color: #5c1e29;
-    color: #ff4d6d;
+.layer-item {
+    background-color: #3d3d4f !important;
+    border: 1px solid #4e4e66 !important;
+    border-radius: 6px;
+    color: #fff;
+    transition: border-color 0.2s ease;
 }
 
-#clearBtn:hover {
-    background-color: #ff4d6d;
-    border-color: #ff4d6d;
-    color: #121212;
+.layer-item.active {
+    background-color: #4e4e66 !important;
+    border: 1px solid #ffb703 !important;
 }
 
-/* ==========================================================================
-   4. CANVAS MAIN WORKSPACE AREA
-   ========================================================================== */
-#workspace {
-    flex-grow: 1;
+.layer-name {
+    font-size: 0.85rem;
+    color: #f5f5f7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+}
+
+.layer-controls-right {
+    display: flex;
+    gap: 4px;
+}
+
+.layer-controls-right button {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    background-color: #1e1e24;
+}
+
+/* Main Studio Viewport Framework */
+#canvas-viewport {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #161616;
+    background-color: #121214;
+    padding: 20px;
     position: relative;
-    padding: 24px;
 }
 
 canvas {
     background-color: #ffffff;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
     cursor: crosshair;
-    image-rendering: -webkit-optimize-contrast; /* Keeps structural line pixel art crisp */
+    image-rendering: pixelated;
 }
 
-/* Help Text Indicator Frame */
-#status-bar {
-    position: absolute;
-    bottom: 14px;
-    left: 24px;
-    font-size: 0.78rem;
-    color: #555555;
-    letter-spacing: 0.3px;
-    pointer-events: none;
+/* System Critical Operations Panel */
+.system-ops {
+    margin-top: auto;
+    border-top: 2px solid #3d3d4f;
+    padding-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
+
+.btn-danger { background-color: #ae2012; }
+.btn-danger:hover { background-color: #ca2e22; }
+.btn-success { background-color: #0096c7; }
+.btn-success:hover { background-color: #00b4d8; }
