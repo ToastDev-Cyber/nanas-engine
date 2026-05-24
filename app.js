@@ -10,11 +10,25 @@ const clearBtn = document.getElementById('clearBtn');
 const brushTool = document.getElementById('brushTool');
 const squareTool = document.getElementById('squareTool');
 const circleTool = document.getElementById('circleTool');
+const textTool = document.getElementById('textTool');
 
 let isDrawing = false;
-let currentTool = 'brush'; // Options: 'brush', 'square', 'circle'
+let currentTool = 'brush'; // Options: 'brush', 'square', 'circle', 'text'
 let startX, startY;        // Holds initial click coordinates
 let snapshot;              // Holds image data to prevent shape tearing
+let activeTextArea = null; // Tracks current live typing element
+let fontLoaded = false;    // Safety check tracking state
+
+// AUTOMATIC ROOT FONT LOADER ENGINE
+// Attempts to grab font.ttf sitting in your main repository folder
+const customFont = new FontFace('NanasEngineFont', 'url(font.ttf)');
+customFont.load().then((loadedFont) => {
+    document.fonts.add(loadedFont);
+    fontLoaded = true;
+    console.log("🍍 Nanas Engine: Custom font loaded successfully from root directory!");
+}).catch((error) => {
+    console.log("⚠️ Nanas Engine: No root font.ttf file detected yet. Falling back to sans-serif safely.");
+});
 
 function resizeCanvas() {
     const tempCanvas = document.createElement('canvas');
@@ -23,8 +37,9 @@ function resizeCanvas() {
     const tempCtx = tempCanvas.getContext('2d');
     tempCtx.drawImage(canvas, 0, 0);
 
+    const toolbarOffset = document.getElementById('toolbar').offsetHeight;
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - document.getElementById('toolbar').offsetHeight;
+    canvas.height = window.innerHeight - toolbarOffset;
 
     ctx.drawImage(tempCanvas, 0, 0);
     ctx.lineCap = 'round';
@@ -34,7 +49,6 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 setTimeout(resizeCanvas, 1);
 
-// Helper to get clean coordinates for both Mouse and Touch
 function getCoordinates(e) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -46,16 +60,23 @@ function getCoordinates(e) {
 }
 
 function startDrawing(e) {
-    isDrawing = true;
+    if (activeTextArea) {
+        finalizeText();
+        return;
+    }
+
     const coords = getCoordinates(e);
     startX = coords.x;
     startY = coords.y;
 
-    // Set styling parameters
+    if (currentTool === 'text') {
+        createTextbox(startX, startY);
+        return;
+    }
+
+    isDrawing = true;
     ctx.strokeStyle = colorPicker.value;
     ctx.lineWidth = brushSize.value;
-    
-    // Save the canvas state exactly as it is right now
     snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
     if (currentTool === 'brush') {
@@ -67,74 +88,117 @@ function startDrawing(e) {
 }
 
 function stopDrawing() {
+    if (currentTool === 'text') return;
     isDrawing = false;
     ctx.beginPath();
 }
 
 function draw(e) {
-    if (!isDrawing) return;
+    if (!isDrawing || currentTool === 'text') return;
 
     const coords = getCoordinates(e);
     const currentX = coords.x;
     const currentY = coords.y;
-
-    // Track if the Alt key is being held down during the event
     const isAltPressed = e.altKey;
 
     if (currentTool === 'brush') {
-        // Brush draws continuously without wiping the canvas with snapshots
         ctx.lineTo(currentX, currentY);
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(currentX, currentY);
     } else if (currentTool === 'square') {
-        // Only restore the preview snapshot for structural shapes
         ctx.putImageData(snapshot, 0, 0);
         ctx.beginPath();
-        
         let width = currentX - startX;
         let height = currentY - startY;
 
-        // If ALT is held, match the width and height to force a perfect geometric square
         if (isAltPressed) {
             const sideLength = Math.max(Math.abs(width), Math.abs(height));
             width = width < 0 ? -sideLength : sideLength;
             height = height < 0 ? -sideLength : sideLength;
         }
-
         ctx.strokeRect(startX, startY, width, height);
     } else if (currentTool === 'circle') {
-        // Only restore the preview snapshot for structural shapes
         ctx.putImageData(snapshot, 0, 0);
         ctx.beginPath();
-        
         if (isAltPressed) {
-            // PERFECT CIRCLE
             const radius = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
             ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
         } else {
-            // STRETCHED ELLIPSE
             const radiusX = Math.abs(currentX - startX);
             const radiusY = Math.abs(currentY - startY);
             ctx.ellipse(startX, startY, radiusX, radiusY, 0, 0, 2 * Math.PI);
         }
-        
         ctx.stroke();
     }
 }
 
-// Event Listeners for UI interaction
+function createTextbox(x, y) {
+    const container = document.getElementById('canvasContainer');
+    const textarea = document.createElement('textarea');
+    
+    textarea.className = 'canvas-textarea';
+    textarea.style.left = `${x}px`;
+    textarea.style.top = `${y}px`;
+    textarea.style.color = colorPicker.value;
+    textarea.style.fontSize = `${brushSize.value}px`;
+    
+    textarea.style.width = '200px';
+    textarea.style.height = `${parseInt(brushSize.value) + 10}px`;
+
+    textarea.addEventListener('input', () => {
+        textarea.style.width = 'auto';
+        textarea.style.width = `${textarea.scrollWidth + 20}px`;
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    });
+
+    container.appendChild(textarea);
+    textarea.focus();
+    activeTextArea = textarea;
+}
+
+function finalizeText() {
+    if (!activeTextArea) return;
+
+    const text = activeTextArea.value;
+    const x = parseInt(activeTextArea.style.left, 10);
+    const y = parseInt(activeTextArea.style.top, 10) + parseInt(brushSize.value, 10) * 0.85;
+
+    if (text.trim() !== "") {
+        ctx.fillStyle = colorPicker.value;
+        
+        // Dynamically apply custom font if verified ready, else fallback to standard sans-serif
+        if (fontLoaded) {
+            ctx.font = `${brushSize.value}px "NanasEngineFont"`;
+        } else {
+            ctx.font = `${brushSize.value}px sans-serif`;
+        }
+        
+        const lines = text.split('\n');
+        let currentY = y;
+        lines.forEach(line => {
+            ctx.fillText(line, x, currentY);
+            currentY += parseInt(brushSize.value, 10);
+        });
+    }
+
+    activeTextArea.remove();
+    activeTextArea = null;
+}
+
+// Click Listeners
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseleave', stopDrawing);
 
+// Touch Listeners
 canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, { passive: false });
 canvas.addEventListener('touchend', stopDrawing);
 canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
 
-// Manage Active Button States
 function setActiveTool(tool, clickedButton) {
+    if (activeTextArea) finalizeText();
     currentTool = tool;
     document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
     clickedButton.classList.add('active');
@@ -143,11 +207,16 @@ function setActiveTool(tool, clickedButton) {
 brushTool.addEventListener('click', () => setActiveTool('brush', brushTool));
 squareTool.addEventListener('click', () => setActiveTool('square', squareTool));
 circleTool.addEventListener('click', () => setActiveTool('circle', circleTool));
+textTool.addEventListener('click', () => setActiveTool('text', textTool));
 
 brushSize.addEventListener('input', () => {
     sizeVal.textContent = `${brushSize.value}px`;
 });
 
 clearBtn.addEventListener('click', () => {
+    if (activeTextArea) {
+        activeTextArea.remove();
+        activeTextArea = null;
+    }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
