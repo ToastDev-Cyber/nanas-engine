@@ -16,14 +16,12 @@ const fontSelect = document.getElementById('fontSelect');
 const fontSelectorGroup = document.getElementById('fontSelectorGroup');
 
 let isDrawing = false;
-let currentTool = 'brush'; // Setup options: 'brush', 'bucket', 'square', 'circle', 'text'
+let currentTool = 'brush'; // Options: 'brush', 'bucket', 'square', 'circle', 'text'
 let startX, startY;        
 let snapshot;              
 let activeTextArea = null; 
 
-// ==========================================
-// 🍍 REPOSITORY FONT FILE TRACKER
-// ==========================================
+// Custom Repository Fonts
 const REPO_FONTS = {
     "edosz.ttf": "Edo SZ"
 };
@@ -44,9 +42,9 @@ function loadRepositoryFonts() {
             option.textContent = displayName;
             fontSelect.appendChild(option);
             
-            console.log(`🍍 Nanas Engine: Loaded [${fontFile}] as "${displayName}" successfully!`);
+            console.log(`🍍 Nanas Engine: Loaded [${fontFile}] successfully.`);
         }).catch((err) => {
-            console.log(`⚠️ Nanas Engine: Could not load asset file [${fontFile}]. Skipping.`);
+            console.log(`⚠️ Nanas Engine: Missing [${fontFile}]. Skipping.`);
         });
     });
 }
@@ -80,7 +78,6 @@ function getCoordinates(e) {
     };
 }
 
-// Helper to convert hex strings (#ffffff) to RGBA color objects
 function hexToRgba(hex) {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -88,21 +85,19 @@ function hexToRgba(hex) {
     return { r, g, b, a: 255 };
 }
 
-// 🪣 FLOOD FILL ENGINE ALGORITHM
+// Flood Fill Engine
 function floodFill(startX, startY, fillColor) {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     const width = imageData.width;
     const height = imageData.height;
 
-    // Get color of target clicked pixel
     const targetIdx = (startY * width + startX) * 4;
     const targetR = data[targetIdx];
     const targetG = data[targetIdx + 1];
     const targetB = data[targetIdx + 2];
     const targetA = data[targetIdx + 3];
 
-    // Avoid infinite loop if clicking on the exact same color
     if (
         targetR === fillColor.r &&
         targetG === fillColor.g &&
@@ -112,7 +107,6 @@ function floodFill(startX, startY, fillColor) {
         return;
     }
 
-    // Queue system processing coordinates
     const queue = [[startX, startY]];
 
     while (queue.length > 0) {
@@ -125,13 +119,11 @@ function floodFill(startX, startY, fillColor) {
             data[idx + 2] === targetB &&
             data[idx + 3] === targetA
         ) {
-            // Apply fill color
             data[idx] = fillColor.r;
             data[idx + 1] = fillColor.g;
             data[idx + 2] = fillColor.b;
             data[idx + 3] = fillColor.a;
 
-            // Check adjacent pixel sides
             if (cx > 0) queue.push([cx - 1, cy]);
             if (cx < width - 1) queue.push([cx + 1, cy]);
             if (cy > 0) queue.push([cx, cy - 1]);
@@ -285,7 +277,7 @@ function updateFontSelectorVisibility() {
     }
 }
 
-// Input listeners
+// Action Event Listeners
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mousemove', draw);
