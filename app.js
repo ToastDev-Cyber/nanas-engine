@@ -30,7 +30,6 @@ const fontSelect = document.getElementById('fontSelect');
 const fontSelectorGroup = document.getElementById('fontSelectorGroup');
 const pencilGrade = document.getElementById('pencilGrade');
 const pencilGradeGroup = document.getElementById('pencilGradeGroup');
-const brushSizeGroup = document.getElementById('brushSizeGroup');
 
 // 🔄 Engine States
 let isDrawing = false;
@@ -134,7 +133,6 @@ function hexToRgba(hex) {
     return { r, g, b, a: 255 };
 }
 
-// Helper to convert hex strings and apply alpha opacity layers cleanly
 function hexToRgbaString(hex, alpha) {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -200,9 +198,7 @@ function configureBrushStyle() {
     } else if (currentTool === 'pencil') {
         const grade = pencilGrade.value;
         const profile = PENCIL_PROFILES[grade];
-        // Merge opacity modifiers onto our target core drawing canvas stroke
         ctx.strokeStyle = hexToRgbaString(colorPicker.value, profile.opacity);
-        // Base brush sizing matrix scaled against real lead tip properties
         ctx.lineWidth = Math.max(0.5, brushSize.value * profile.sizeMultiplier);
     } else {
         ctx.strokeStyle = colorPicker.value;
