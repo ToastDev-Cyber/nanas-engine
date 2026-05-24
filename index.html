@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nanas Engine</title>
     <style>
-        /* Modern Dark Mode Styling */
+        /* ==========================================================================
+           1. GLOBAL RESET & BASE SETTINGS
+           ========================================================================== */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none; /* Prevents text highlighting while dragging brushes */
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
         }
 
         body {
@@ -22,50 +24,78 @@
             overflow: hidden;
         }
 
-        /* Sidebar Design */
+        /* Custom scrollbar behavior for the sidebar layout */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffb703;
+        }
+
+        /* ==========================================================================
+           2. SIDEBAR NAVIGATION PANEL (DARK MODE)
+           ========================================================================== */
         #sidebar {
-            width: 280px;
+            width: 290px;
             background-color: #1e1e1e;
-            border-right: 1px solid #333;
+            border-right: 1px solid #2d2d2d;
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            gap: 15px;
+            padding: 24px 18px;
+            gap: 18px;
             overflow-y: auto;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 10;
         }
 
         h1 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: #ffb703;
             text-align: center;
-            margin-bottom: 10px;
-            font-weight: 600;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .section-title {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #888;
-            margin-top: 10px;
-            margin-bottom: 5px;
+            letter-spacing: 1.2px;
+            color: #777;
+            margin-top: 8px;
+            font-weight: bold;
+            border-bottom: 1px solid #2d2d2d;
+            padding-bottom: 4px;
         }
 
+        /* ==========================================================================
+           3. UI INPUTS, GRIDS & COMPONENTS
+           ========================================================================== */
         .tool-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 8px;
         }
 
+        /* Shared styling across standard buttons and file upload facades */
         button, .file-label {
-            background-color: #2b2b2b;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            padding: 10px;
+            background-color: #262626;
+            color: #dcdcdc;
+            border: 1px solid #383838;
+            padding: 10px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.15s ease-in-out;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -73,74 +103,118 @@
         }
 
         button:hover, .file-label:hover {
-            background-color: #3a3a3a;
+            background-color: #323232;
             border-color: #ffb703;
+            color: #ffffff;
         }
 
+        /* Active Engine State Selection Highlight */
         button.active {
             background-color: #ffb703;
             color: #121212;
-            font-weight: bold;
+            font-weight: 600;
             border-color: #ffb703;
-        }
-
-        select, input[type="color"], input[type="range"] {
-            width: 100%;
-            background-color: #2b2b2b;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            padding: 8px;
-            border-radius: 6px;
-            outline: none;
-        }
-
-        input[type="color"] {
-            height: 40px;
-            cursor: pointer;
-            padding: 2px;
+            box-shadow: 0 0 10px rgba(255, 183, 3, 0.2);
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 6px;
         }
 
+        .control-group label {
+            font-size: 0.8rem;
+            color: #b0b0b0;
+        }
+
+        /* Native Select Dropdowns & Sliders */
+        select, input[type="range"] {
+            width: 100%;
+            background-color: #262626;
+            color: #e0e0e0;
+            border: 1px solid #383838;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        select:focus {
+            border-color: #ffb703;
+        }
+
+        /* Color Picker Mask Styling */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: 1px solid #383838;
+            width: 100%;
+            height: 38px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* Hidden elements matching standard browser file pickers */
         input[type="file"] {
             display: none;
         }
 
-        /* Action Buttons (Clear, Export, Import) */
+        /* Action Utilities Layout Context */
         .action-btn {
-            border-color: #555;
+            width: 100%;
         }
-        #clearBtn { border-color: #d90429; }
-        #clearBtn:hover { background-color: #d90429; color: white; }
 
-        /* Canvas Workspace Area */
+        #clearBtn {
+            border-color: #5c1e29;
+            color: #ff4d6d;
+        }
+
+        #clearBtn:hover {
+            background-color: #ff4d6d;
+            border-color: #ff4d6d;
+            color: #121212;
+        }
+
+        /* ==========================================================================
+           4. CANVAS MAIN WORKSPACE AREA
+           ========================================================================== */
         #workspace {
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #141414;
+            background-color: #161616;
             position: relative;
-            padding: 20px;
+            padding: 24px;
         }
 
         canvas {
             background-color: #ffffff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border-radius: 4px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
             cursor: crosshair;
+            image-rendering: -webkit-optimize-contrast; /* Keeps structural line pixel art crisp */
         }
 
+        /* Help Text Indicator Frame */
         #status-bar {
             position: absolute;
-            bottom: 10px;
-            left: 20px;
-            font-size: 0.8rem;
-            color: #666;
+            bottom: 14px;
+            left: 24px;
+            font-size: 0.78rem;
+            color: #555555;
+            letter-spacing: 0.3px;
             pointer-events: none;
         }
     </style>
@@ -161,7 +235,7 @@
             <button id="tool-text" onclick="setTool('text')">Text Tool</button>
         </div>
 
-        <div class="section-title">Shapes (Hold Alt for perfect shape)</div>
+        <div class="section-title">Shapes</div>
         <div class="tool-grid">
             <button id="tool-square" onclick="setTool('square')">Square</button>
             <button id="tool-circle" onclick="setTool('circle')">Circle</button>
@@ -174,10 +248,10 @@
             <input type="color" id="colorPicker" value="#000000">
         </div>
 
-        <!-- Dynamic Pencil Grade Selector -->
+        <!-- Dynamic Pencil Grade Selector Panel -->
         <div class="control-group" id="pencil-grade-container" style="display: none;">
-            <label>Pencil Grade</label>
-            <select id="pencilGrade" onchange="updatePencilGrade()">
+            <label>Pencil Grade (Graphite)</label>
+            <select id="pencilGrade" onchange="updatePencilSettings()">
                 <option value="10H">10H (Lightest)</option>
                 <option value="9H">9H</option>
                 <option value="8H">8H</option>
@@ -210,8 +284,13 @@
             <input type="range" id="brushSize" min="1" max="100" value="10">
         </div>
 
+        <div class="control-group" id="opacity-container">
+            <label>Global Opacity</label>
+            <input type="range" id="globalOpacity" min="1" max="100" value="100">
+        </div>
+
         <!-- Custom Font Upload Section -->
-        <div class="control-group id="font-container" style="display: none;">
+        <div class="control-group" id="font-container" style="display: none;">
             <label>Text Custom Font</label>
             <label class="file-label" for="fontUpload">Upload Font (.ttf/.otf)</label>
             <input type="file" id="fontUpload" accept=".ttf,.otf">
@@ -227,24 +306,30 @@
     <!-- MAIN APP CANVAS WORKSPACE -->
     <div id="workspace">
         <canvas id="paintCanvas" width="800" height="600"></canvas>
-        <div id="status-bar">Tip: Press and hold 'Alt' while creating shapes to force them into equal ratios.</div>
+        <div id="status-bar">Tip: Press and hold 'Alt' while creating shapes to lock aspect ratio constraints.</div>
     </div>
 
     <!-- ENGINE APPLICATION CORE LOGIC -->
     <script>
+        /**
+         * Nanas Engine - Application Logic Core
+         * Handles drawing, canvas calculations, tools, and dynamic file assets.
+         */
+
+        // Initialize HTML canvas properties and set pixel context safety
         const canvas = document.getElementById('paintCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        
-        // App Configurations & Tools State
+
+        // Application State Parameters
         let currentTool = 'brush';
         let isDrawing = false;
         let startX = 0;
         let startY = 0;
-        let snapshot = null;
+        let snapshot = null; // Holds temporary pixel arrays for live shape preview boundaries
         let isAltPressed = false;
         let activeFont = 'Arial';
 
-        // Pencil grading configurations maps opacity and base stroke values
+        // Pencil grading profile array mapping opacity values and line sizes
         const pencilGrades = {
             '10H': { opacity: 0.05, sizeMultiplier: 0.6 }, '9H': { opacity: 0.08, sizeMultiplier: 0.6 },
             '8H': { opacity: 0.12, sizeMultiplier: 0.7 }, '7H': { opacity: 0.15, sizeMultiplier: 0.7 },
@@ -260,88 +345,137 @@
             '11B':{ opacity: 0.99, sizeMultiplier: 1.6 }, '12B':{ opacity: 1.00, sizeMultiplier: 1.8 }
         };
 
-        // DOM Element references
+        // DOM References
         const colorPicker = document.getElementById('colorPicker');
         const brushSize = document.getElementById('brushSize');
+        const globalOpacity = document.getElementById('globalOpacity');
         const pencilGradeSelect = document.getElementById('pencilGrade');
         const fontUpload = document.getElementById('fontUpload');
 
-        // Track global Alt key listeners for shape normalization
+        /* ==========================================================================
+           1. MAIN ENGINE OPERATIONS & UTILITIES
+           ========================================================================== */
+
+        /**
+         * Updates UI configurations and shifts application runtime state to specific tool profiles.
+         * @param {string} toolName - Selected application tool label.
+         */
+        function setTool(toolName) {
+            currentTool = toolName;
+            
+            // Manage CSS active design flags across control elements
+            document.querySelectorAll('#sidebar button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tool-${toolName}`).classList.add('active');
+
+            // Toggle conditional configurations UI panels
+            document.getElementById('pencil-grade-container').style.display = (toolName === 'pencil') ? 'flex' : 'none';
+            document.getElementById('font-container').style.display = (toolName === 'text') ? 'flex' : 'none';
+            
+            // Control visibility of standard opacity controls for cleaner integration
+            document.getElementById('opacity-container').style.display = (toolName === 'pencil' || toolName === 'eraser' || toolName === 'eyedropper' || toolName === 'bucket') ? 'none' : 'flex';
+        }
+
+        /**
+         * Decodes hexadecimal colors into separate RGB data segments.
+         * @param {string} hex - Hexadecimal color notation (#ffffff).
+         */
+        function hexToRgb(hex) {
+            const parsed = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return parsed ? {
+                r: parseInt(parsed[1], 16),
+                g: parseInt(parsed[2], 16),
+                b: parseInt(parsed[3], 16)
+            } : null;
+        }
+
+        /**
+         * Mixes hexadecimal colors with custom transparent alpha opacity metrics.
+         */
+        function hexToRgbaStr(hex, opacityAlpha) {
+            const rgb = hexToRgb(hex);
+            return rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacityAlpha})` : hex;
+        }
+
+        // System keyboard listener bindings for shape lock checks
         window.addEventListener('keydown', (e) => { if (e.key === 'Alt') isAltPressed = true; });
         window.addEventListener('keyup', (e) => { if (e.key === 'Alt') isAltPressed = false; });
 
-        // Tool Mode switcher
-        function setTool(toolName) {
-            currentTool = toolName;
-            document.querySelectorAll('#sidebar button').forEach(b => b.classList.remove('active'));
-            document.getElementById(`tool-${toolName}`).classList.add('active');
+        /* ==========================================================================
+           2. FLOOD FILL ENGINE (BUCKET TOOL)
+           ========================================================================== */
 
-            // Toggle conditional sidebar configurations UI panel assets
-            document.getElementById('pencil-grade-container').style.display = (toolName === 'pencil') ? 'flex' : 'none';
-            document.getElementById('font-container').style.display = (toolName === 'text') ? 'flex' : 'none';
-        }
-
-        // Color Converter Utility (Hex code to RGB breakdown)
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
-        }
-
-        // Flood Fill Algorithm (Bucket Tool Action Engine)
-        function floodFill(startX, startY, fillColorHex) {
-            const targetColor = ctx.getImageData(startX, startY, 1, 1).data;
-            const fillRgb = hexToRgb(fillColorHex);
+        /**
+         * Executes a 4-way queue-based flood fill algorithm over the canvas array context.
+         */
+        function floodFill(xPosition, yPosition, fillColorHex) {
+            const initialPixel = ctx.getImageData(xPosition, yPosition, 1, 1).data;
+            const targetColor = hexToRgb(fillColorHex);
             
-            if (!fillRgb) return;
-            if (targetColor[0] === fillRgb.r && targetColor[1] === fillRgb.g && 
-                targetColor[2] === fillRgb.b && targetColor[3] === 255) return;
+            if (!targetColor) return;
 
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            const width = canvas.width;
-            const height = canvas.height;
+            // Boundary check: Skip filling if target and initial base matching values overlap
+            if (initialPixel[0] === targetColor.r && 
+                initialPixel[1] === targetColor.g && 
+                initialPixel[2] === targetColor.b && 
+                initialPixel[3] === 255) return;
 
-            const queue = [[startX, startY]];
-            const targetR = targetColor[0];
-            const targetG = targetColor[1];
-            const targetB = targetColor[2];
-            const targetA = targetColor[3];
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const dataStream = imgData.data;
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
 
-            while (queue.length > 0) {
-                const [x, y] = queue.shift();
-                if (x < 0 || x >= width || y < 0 || y >= height) continue;
+            const coordinatesQueue = [[xPosition, yPosition]];
+            const baseR = initialPixel[0];
+            const baseG = initialPixel[1];
+            const baseB = initialPixel[2];
+            const baseA = initialPixel[3];
 
-                const idx = (y * width + x) * 4;
-                if (data[idx] === targetR && data[idx+1] === targetG && 
-                    data[idx+2] === targetB && data[idx+3] === targetA) {
+            while (coordinatesQueue.length > 0) {
+                const [currentX, currentY] = coordinatesQueue.shift();
+                if (currentX < 0 || currentX >= canvasWidth || currentY < 0 || currentY >= canvasHeight) continue;
+
+                const byteIndex = (currentY * canvasWidth + currentX) * 4;
+
+                if (dataStream[byteIndex] === baseR && 
+                    dataStream[byteIndex + 1] === baseG && 
+                    dataStream[byteIndex + 2] === baseB && 
+                    dataStream[byteIndex + 3] === baseA) {
                     
-                    data[idx] = fillRgb.r;
-                    data[idx+1] = fillRgb.g;
-                    data[idx+2] = fillRgb.b;
-                    data[idx+3] = 255;
+                    // Rewrite standard pixel addresses with fill color configurations
+                    dataStream[byteIndex] = targetColor.r;
+                    dataStream[byteIndex + 1] = targetColor.g;
+                    dataStream[byteIndex + 2] = targetColor.b;
+                    dataStream[byteIndex + 3] = 255;
 
-                    queue.push([x + 1, y]);
-                    queue.push([x - 1, y]);
-                    queue.push([x, y + 1]);
-                    queue.push([x, y - 1]);
+                    // Push neighboring node targets into algorithm check stream loops
+                    coordinatesQueue.push([currentX + 1, currentY]);
+                    coordinatesQueue.push([currentX - 1, currentY]);
+                    coordinatesQueue.push([currentX, currentY + 1]);
+                    coordinatesQueue.push([currentX, currentY - 1]);
                 }
             }
-            ctx.putImageData(imageData, 0, 0);
+            ctx.putImageData(imgData, 0, 0);
         }
 
-        // Canvas Interaction Triggers
+        /* ==========================================================================
+           3. MOUSE EVENT HANDLERS & GRAPHICS PROCESSING
+           ========================================================================== */
+
         canvas.addEventListener('mousedown', (e) => {
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
-            startX = e.clientX - rect.left;
-            startY = e.clientY - rect.top;
+            startX = Math.floor(e.clientX - rect.left);
+            startY = Math.floor(e.clientY - rect.top);
             
-            // Instantly snapshot context prior to shape structural changes
+            // Capture snapshot array map state prior to layout alterations
             snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
+            // Compute active dynamic opacity scale (0.0 to 1.0 range mapping)
+            const currentAlpha = globalOpacity.value / 100;
+
             ctx.beginPath();
-            ctx.strokeStyle = colorPicker.value;
-            ctx.fillStyle = colorPicker.value;
+            ctx.strokeStyle = hexToRgbaStr(colorPicker.value, currentAlpha);
+            ctx.fillStyle = hexToRgbaStr(colorPicker.value, currentAlpha);
             ctx.lineWidth = brushSize.value;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -354,27 +488,32 @@
                 const grade = pencilGrades[pencilGradeSelect.value];
                 const rgb = hexToRgb(colorPicker.value);
                 ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${grade.opacity})`;
-                ctx.lineWidth = Math.max(0.5, brushSize.value * grade.sizeMultiplier * 0.2);
+                ctx.lineWidth = Math.max(0.5, brushSize.value * grade.sizeMultiplier * 0.15);
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(startX, startY);
                 ctx.stroke();
             } else if (currentTool === 'eraser') {
-                ctx.strokeStyle = '#ffffff'; // White out path lines
+                ctx.strokeStyle = '#ffffff'; // White out line paths cleanly
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(startX, startY);
                 ctx.stroke();
             } else if (currentTool === 'eyedropper') {
-                isDrawing = false; 
-                executeEyedropper(startX, startY);
+                isDrawing = false;
+                const targetPixel = ctx.getImageData(startX, startY, 1, 1).data;
+                if (targetPixel[3] !== 0) { // Fall back onto pure white if node target matches clear transparency layers
+                    colorPicker.value = "#" + ("000000" + ((targetPixel[0] << 16) | (targetPixel[1] << 8) | targetPixel[2]).toString(16)).slice(-6);
+                } else {
+                    colorPicker.value = "#ffffff";
+                }
             } else if (currentTool === 'bucket') {
                 isDrawing = false;
-                floodFill(Math.floor(startX), Math.floor(startY), colorPicker.value);
+                floodFill(startX, startY, colorPicker.value);
             } else if (currentTool === 'text') {
                 isDrawing = false;
-                const textInput = prompt("Enter text to apply onto canvas view workspace:");
-                if (textInput) {
+                const inputString = prompt("Enter text overlay to append into your workspace context layer:");
+                if (inputString) {
                     ctx.font = `${brushSize.value * 2}px ${activeFont}`;
-                    ctx.fillText(textInput, startX, startY);
+                    ctx.fillText(inputString, startX, startY);
                 }
             }
         });
@@ -382,38 +521,37 @@
         canvas.addEventListener('mousemove', (e) => {
             if (!isDrawing) return;
             const rect = canvas.getBoundingClientRect();
-            const currentX = e.clientX - rect.left;
-            const currentY = e.clientY - rect.top;
+            const currentX = Math.floor(e.clientX - rect.left);
+            const currentY = Math.floor(e.clientY - rect.top);
 
-            // Freeform tools do not clear via image snapshot arrays
             if (currentTool === 'brush' || currentTool === 'eraser' || currentTool === 'pencil') {
                 ctx.lineTo(currentX, currentY);
                 ctx.stroke();
             } else {
-                // Shapes re-render back onto clean snapshot buffer arrays
+                // Redraw baseline context canvas from pixel array matrix to prevent graphic ghost trails
                 ctx.putImageData(snapshot, 0, 0);
                 
-                let width = currentX - startX;
-                let height = currentY - startY;
+                let deltaWidth = currentX - startX;
+                let deltaHeight = currentY - startY;
 
-                // Handle Alt key down state validation to ensure perfect dimension properties
+                // Apply geometric locking configurations when 'Alt' is held down
                 if (isAltPressed) {
-                    const absSide = Math.max(Math.abs(width), Math.abs(height));
-                    width = width < 0 ? -absSide : absSide;
-                    height = height < 0 ? -absSide : absSide;
+                    const edgeValue = Math.max(Math.abs(deltaWidth), Math.abs(deltaHeight));
+                    deltaWidth = deltaWidth < 0 ? -edgeValue : edgeValue;
+                    deltaHeight = deltaHeight < 0 ? -edgeValue : edgeValue;
                 }
 
                 ctx.beginPath();
                 if (currentTool === 'square') {
-                    ctx.strokeRect(startX, startY, width, height);
+                    ctx.strokeRect(startX, startY, deltaWidth, deltaHeight);
                 } else if (currentTool === 'circle') {
-                    const radius = Math.sqrt(width * width + height * height);
-                    ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                    const circleRadius = Math.sqrt(deltaWidth * deltaWidth + deltaHeight * deltaHeight);
+                    ctx.arc(startX, startY, circleRadius, 0, 2 * Math.PI);
                     ctx.stroke();
                 } else if (currentTool === 'triangle') {
-                    ctx.moveTo(startX + width / 2, startY);
-                    ctx.lineTo(startX, startY + height);
-                    ctx.lineTo(startX + width, startY + height);
+                    ctx.moveTo(startX + deltaWidth / 2, startY);
+                    ctx.lineTo(startX, startY + deltaHeight);
+                    ctx.lineTo(startX + deltaWidth, startY + deltaHeight);
                     ctx.closePath();
                     ctx.stroke();
                 }
@@ -423,64 +561,58 @@
         canvas.addEventListener('mouseup', () => isDrawing = false);
         canvas.addEventListener('mouseleave', () => isDrawing = false);
 
-        // Eyedropper Functionality
-        function executeEyedropper(x, y) {
-            const pixel = ctx.getImageData(x, y, 1, 1).data;
-            // Check if alpha channel is 0 (fully transparent white background default)
-            if (pixel[3] === 0) {
-                colorPicker.value = "#ffffff";
-                return;
-            }
-            const hex = "#" + ("000000" + ((pixel[0] << 16) | (pixel[1] << 8) | pixel[2]).toString(16)).slice(-6);
-            colorPicker.value = hex;
-        }
+        /* ==========================================================================
+           4. FILE SYSTEM UTILITY ARCHITECTURE (IMPORT, EXPORT & FONTS)
+           ========================================================================== */
 
-        // Custom Font Upload Handling via dynamic CSS injection API
+        // Custom Font parser engine hook via inline dynamic context compilation
         fontUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const fontName = 'CustomUploadedFont';
-                    const fontFace = new FontFace(fontName, event.target.result);
-                    fontFace.load().then((loadedFace) => {
-                        document.fonts.add(loadedFace);
-                        activeFont = fontName;
-                        alert("Custom font parsed and active inside Text Tool module!");
-                    }).catch(err => alert("Error parsing custom font configuration framework: " + err));
+            const targetFile = e.target.files[0];
+            if (targetFile) {
+                const fileReader = new FileReader();
+                fileReader.onload = function(event) {
+                    const temporaryFontName = 'DynamicUploadedFont';
+                    const convertedFontFace = new FontFace(temporaryFontName, event.target.result);
+                    
+                    convertedFontFace.load().then((loadedFont) => {
+                        document.fonts.add(loadedFont);
+                        activeFont = temporaryFontName;
+                        alert("Font configuration accepted and linked directly with the Text tool.");
+                    }).catch(() => alert("Font array compilation failure. Please check your source file extensions (.ttf/.otf)."));
                 };
-                reader.readAsArrayBuffer(file);
+                fileReader.readAsArrayBuffer(targetFile);
             }
         });
 
-        // App Workspace Utilities Action Sets
+        // Clear canvas system check loop
         document.getElementById('clearBtn').addEventListener('click', () => {
-            if (confirm("Are you sure you want to clear the entire canvas scene?")) {
+            if (confirm("Reset current canvas viewport layers? All unstored modifications will be dropped.")) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
         });
 
+        // Canvas image export workflow stream setup
         document.getElementById('exportBtn').addEventListener('click', () => {
-            const link = document.createElement('a');
-            link.download = 'nanas-engine-export.png';
-            link.href = canvas.toDataURL();
-            link.click();
+            const fileAnchorElement = document.createElement('a');
+            fileAnchorElement.download = 'nanas-engine-canvas-output.png';
+            fileAnchorElement.href = canvas.toDataURL();
+            fileAnchorElement.click();
         });
 
+        // Structural workflow import mapping system configurations
         document.getElementById('importBtn').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
+            const importedImageFile = e.target.files[0];
+            if (importedImageFile) {
+                const readerInstance = new FileReader();
+                readerInstance.onload = function(event) {
+                    const runtimeImageContainer = new Image();
+                    runtimeImageContainer.onload = function() {
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        // Scale image fitting properties bounding directly into canvas dimension slots
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    }
-                    img.src = event.target.result;
-                }
-                reader.readAsDataURL(file);
+                        ctx.drawImage(runtimeImageContainer, 0, 0, canvas.width, canvas.height);
+                    };
+                    runtimeImageContainer.src = event.target.result;
+                };
+                readerInstance.readAsDataURL(importedImageFile);
             }
         });
     </script>
