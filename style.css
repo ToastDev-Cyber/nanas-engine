@@ -16,3 +16,10 @@ canvas {
 }
 
 .controls { margin: 20px; display: flex; justify-content: center; gap: 10px; }
+
+/* Add to style.css */
+canvas {
+    border: 5px solid red !important; /* Force a thick red border */
+    display: block;
+    margin: 0 auto;
+}
