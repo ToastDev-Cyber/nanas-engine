@@ -5,12 +5,23 @@ const lineWidth = document.getElementById('lineWidth');
 let painting = false;
 let activeTool = 'brush';
 
-function startPosition(e) { painting = true; draw(e); }
-function finishedPosition() { painting = false; ctx.beginPath(); }
+function setTool(tool) { activeTool = tool; }
+
+function startPosition(e) {
+    painting = true;
+    ctx.beginPath(); // Start a new path
+    draw(e);
+}
+
+function finishedPosition() {
+    painting = false;
+    ctx.beginPath(); // Reset path to prevent connecting strokes
+}
 
 function draw(e) {
     if (!painting) return;
-    
+
+    // Set configuration
     ctx.lineWidth = lineWidth.value;
     ctx.lineCap = 'round';
 
@@ -21,27 +32,33 @@ function draw(e) {
         ctx.strokeStyle = colorPicker.value;
     }
 
+    // Get position relative to canvas
     const rect = canvas.getBoundingClientRect();
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    ctx.lineTo(x, y);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.moveTo(x, y); // Move pointer to end of stroke
 }
 
 function invertColors() {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     for (let i = 0; i < data.length; i += 4) {
-        data[i] = 255 - data[i];     // R
-        data[i+1] = 255 - data[i+1]; // G
-        data[i+2] = 255 - data[i+2]; // B
+        data[i] = 255 - data[i];     // Red
+        data[i+1] = 255 - data[i+1]; // Green
+        data[i+2] = 255 - data[i+2]; // Blue
+        // Alpha (data[i+3]) is left untouched
     }
     ctx.putImageData(imageData, 0, 0);
 }
 
+// Event Listeners
 canvas.addEventListener('mousedown', startPosition);
 canvas.addEventListener('mouseup', finishedPosition);
 canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseleave', finishedPosition); // Stop drawing if mouse leaves canvas
 
 document.getElementById('clearBtn').addEventListener('click', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
