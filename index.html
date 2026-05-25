@@ -3,57 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanas Engine Drawing App</title>
-    <style>
-        body { text-align: center; font-family: sans-serif; background: #f0f0f0; }
-        canvas { background: white; border: 2px solid #333; cursor: crosshair; touch-action: none; }
-        .controls { margin: 10px; }
-    </style>
+    <title>Nanas Engine</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <h1>Nanas Engine</h1>
+    
     <div class="controls">
         <input type="color" id="colorPicker">
         <input type="range" id="lineWidth" min="1" max="20" value="5">
-        <button onclick="clearCanvas()">Clear</button>
-        <button onclick="saveImage()">Download</button>
+        <button id="clearBtn">Clear</button>
+        <button id="saveBtn">Download</button>
     </div>
+
     <canvas id="paintCanvas" width="800" height="500"></canvas>
 
-    <script>
-        const canvas = document.getElementById('paintCanvas');
-        const ctx = canvas.getContext('2d');
-        let painting = false;
-
-        function startPosition(e) { painting = true; draw(e); }
-        function finishedPosition() { painting = false; ctx.beginPath(); }
-
-        function draw(e) {
-            if (!painting) return;
-            ctx.lineWidth = document.getElementById('lineWidth').value;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = document.getElementById('colorPicker').value;
-
-            const rect = canvas.getBoundingClientRect();
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-        }
-
-        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-
-        function saveImage() {
-            const link = document.createElement('a');
-            link.download = 'nanas-art.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        }
-
-        canvas.addEventListener('mousedown', startPosition);
-        canvas.addEventListener('mouseup', finishedPosition);
-        canvas.addEventListener('mousemove', draw);
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
