@@ -1,141 +1,29 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Nanas Engine - Full Edition</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background-color: #1e1e24; color: #fff; display: flex; height: 100vh; overflow: hidden; }
-        
-        #sidebar { width: 300px; background: #2b2b36; padding: 15px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #444; }
-        .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        button { background: #3d3d4f; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #ffb703; color: #000; }
-        
-        #layersContainer { flex-grow: 1; overflow-y: auto; margin-top: 10px; }
-        .layer-item { background: #3d3d4f; padding: 8px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .layer-item.active { border: 2px solid #ffb703; }
-        
-        #canvas-viewport { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #121214; }
-        canvas { background: white; cursor: crosshair; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nanas Engine</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<div id="sidebar">
-    <h2>Nanas Engine</h2>
-    <div class="tool-grid">
-        <button onclick="currentTool='brush'">🖌️ Brush</button>
-        <button onclick="currentTool='eraser'">🧽 Eraser</button>
-        <button onclick="saveProject()">💾 Save .nns</button>
-        <button onclick="document.getElementById('importFile').click()">📂 Load .nns</button>
-        <input type="file" id="importFile" style="display:none" onchange="loadProject(event)">
-    </div>
-    <button onclick="requestNewLayerCreation()" style="background:#ffb703; color:black; font-weight:bold;">➕ New Layer</button>
-    <div id="layersContainer"></div>
-</div>
+  <div class="toolbar">
+    <h1>Nanas Engine</h1>
 
-<div id="canvas-viewport">
-    <canvas id="paintCanvas" width="800" height="600"></canvas>
-</div>
+    <label>Color</label>
+    <input type="color" id="colorPicker" value="#000000"/>
 
-<script>
-    const canvas = document.getElementById('paintCanvas');
-    const ctx = canvas.getContext('2d');
-    let layers = [];
-    let activeLayer = null;
-    let currentTool = 'brush';
-    let isDrawing = false;
+    <label>Brush Size</label>
+    <input type="range" id="brushSize" min="1" max="50" value="5"/>
 
-    // --- DRAWING LOGIC ---
-    canvas.addEventListener('mousedown', e => { isDrawing = true; draw(e); });
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', () => isDrawing = false);
+    <button id="clearBtn">Clear</button>
+    <button id="saveBtn">Save</button>
+  </div>
 
-    function draw(e) {
-        if (!isDrawing || !activeLayer) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        activeLayer.ctx.lineCap = 'round';
-        activeLayer.ctx.lineWidth = 5;
-        activeLayer.ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : '#000000';
-        activeLayer.ctx.lineTo(x, y);
-        activeLayer.ctx.stroke();
-        activeLayer.ctx.beginPath();
-        activeLayer.ctx.moveTo(x, y);
-        render();
-    }
+  <canvas id="canvas"></canvas>
 
-    // --- LAYER MANAGEMENT ---
-    function createLayer(name) {
-        const c = document.createElement('canvas');
-        c.width = canvas.width; c.height = canvas.height;
-        const layer = { id: Date.now(), name, canvas: c, ctx: c.getContext('2d'), visible: true };
-        layers.push(layer);
-        activeLayer = layer;
-        updateUI();
-        render();
-    }
-
-    function requestNewLayerCreation() {
-        const name = prompt("Layer Name:", "Layer " + (layers.length + 1));
-        if (name) createLayer(name);
-    }
-
-    function render() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        layers.forEach(l => { if (l.visible) ctx.drawImage(l.canvas, 0, 0); });
-    }
-
-    function updateUI() {
-        const container = document.getElementById('layersContainer');
-        container.innerHTML = '';
-        [...layers].reverse().forEach(l => {
-            const div = document.createElement('div');
-            div.className = `layer-item ${activeLayer.id === l.id ? 'active' : ''}`;
-            div.innerHTML = `<span onclick="activeLayer=layers.find(x=>x.id===${l.id}); updateUI()">${l.name}</span>
-                             <button onclick="renameLayer(${l.id})">✏️</button>`;
-            container.appendChild(div);
-        });
-    }
-
-    function renameLayer(id) {
-        const layer = layers.find(l => l.id === id);
-        const name = prompt("Rename:", layer.name);
-        if (name) { layer.name = name; updateUI(); }
-    }
-
-    // --- NNS PROTOCOL ---
-    function saveProject() {
-        const data = { signature: "NANAS_V3", layers: layers.map(l => ({ name: l.name, data: l.canvas.toDataURL() })) };
-        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = "project.nns";
-        a.click();
-    }
-
-    async function loadProject(e) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            const json = JSON.parse(ev.target.result);
-            layers = [];
-            for (const l of json.layers) {
-                const img = new Image();
-                img.src = l.data;
-                await img.decode();
-                createLayer(l.name);
-                activeLayer.ctx.drawImage(img, 0, 0);
-            }
-            render();
-        };
-        reader.readAsText(file);
-    }
-
-    createLayer("Background");
-</script>
+  <script src="script.js"></script>
 </body>
 </html>
