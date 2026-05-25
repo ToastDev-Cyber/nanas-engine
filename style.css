@@ -1,8 +1,7 @@
-/* style.css */
 body { 
     text-align: center; 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    background: #f0f0f0; 
+    font-family: sans-serif; 
+    background-color: #f4f4f9;
 }
 
 canvas { 
@@ -10,18 +9,13 @@ canvas {
     border: 2px solid #333; 
     cursor: crosshair; 
     touch-action: none; 
-    display: block;
-    margin: 0 auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .controls { 
     margin: 20px; 
-    padding: 10px;
-}
-
-button {
-    padding: 8px 16px;
-    cursor: pointer;
-    background: #fff;
-    border: 1px solid #333;
+    display: flex; 
+    justify-content: center; 
+    gap: 10px;
+    align-items: center;
 }
